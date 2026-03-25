@@ -1,13 +1,40 @@
 export const content = {
-  name: "Alex Dorj",
-  title: "DevOps / Cloud Engineer * AWS * Kubernetes",
-  location: "Ulaanbaatar, Mongolia",
+  name: "Erdenetugs Enkhchuluun",
+  title: "DevOps / Cloud Engineer",
+  location: "Schaumburg, IL",
   about: "I'm a DevOps / Cloud Engineer who likes working on the infrastructure side of things. Mostly Kubernetes, AWS, and CI/CD — making deploys fast and boring is kind of my thing. Looking for a team where that work actually matters.",
 
   skills: [
     "Kubernetes", "Docker", "AWS EKS", "AWS ECR", "AWS S3",
     "AWS CloudFront", "AWS Route 53", "Helm", "ArgoCD",
     "GitHub Actions", "Terraform", "Linux", "Node.js", "Python", "Git"
+  ],
+
+  skillCategories: [
+    {
+      name: "Kubernetes & GitOps",
+      subskills: ["AWS EKS", "Helm Charts", "ArgoCD", "HPA", "RBAC", "Rolling deploys", "Readiness probes"]
+    },
+    {
+      name: "AWS",
+      subskills: ["EKS", "ECR", "S3", "CloudFront", "Route 53", "ACM", "IAM", "API Gateway", "Lambda", "SQS"]
+    },
+    {
+      name: "CI/CD & Automation",
+      subskills: ["GitHub Actions", "OIDC auth", "ECR push", "ArgoCD sync", "Multi-env promotion", "Self-hosted runners"]
+    },
+    {
+      name: "Infrastructure as Code",
+      subskills: ["Terraform", "Reusable modules", "Remote state", "AWS Organizations", "SCP"]
+    },
+    {
+      name: "Docker & Containers",
+      subskills: ["Multi-stage builds", "Non-root user", "Layer caching", "dockerignore", "ECR"]
+    },
+    {
+      name: "Languages & Tools",
+      subskills: ["Node.js", "Python", "Bash", "Git", "Linux", "FastAPI", "PostgreSQL"]
+    },
   ],
 
   projects: [
@@ -20,21 +47,15 @@ export const content = {
     },
     {
       title: "Event-Driven Self-Hosted GitHub Actions Runners on AWS",
-      description: "Terraform monorepo that eliminates always-on CI/CD servers. When a GitHub workflow job is queued, a webhook hits API Gateway → a Node.js Lambda validates the HMAC-SHA256 signature → SQS buffers the event → a runner manager Lambda authenticates via GitHub App, tries Spot pricing first (on-demand fallback), and launches an ephemeral EC2 instance that registers as a runner, completes the job, and self-terminates. Pre-baked AMI (Node.js, Docker, Terraform, AWS CLI pre-installed) cuts cold-start to under 60 seconds. Idempotent EC2 launches via ClientToken prevent duplicate runners on SQS retry. Hash-based multi-AZ subnet selection spreads Spot capacity risk. SCP layer enforces mandatory tagging, region restriction, and root account lockdown org-wide as preventive controls. DRY: one reusable GitHub Actions workflow drives all 5 Terraform modules via OIDC — no static AWS keys anywhere.",
+      description: "Terraform monorepo that eliminates always-on CI/CD servers. When a GitHub workflow job is queued, a webhook hits API Gateway → a Node.js Lambda validates the HMAC-SHA256 signature → SQS buffers the event → a runner manager Lambda authenticates via GitHub App, tries Spot pricing first (on-demand fallback), and launches an ephemeral EC2 instance that registers as a runner, completes the job, and self-terminates. Pre-baked AMI cuts cold-start to under 60 seconds. Hash-based multi-AZ subnet selection spreads Spot capacity risk. DRY: one reusable GitHub Actions workflow drives all 5 Terraform modules via OIDC — no static AWS keys anywhere.",
       tags: ["Terraform", "AWS Lambda", "SQS", "API Gateway", "EC2 Spot", "GitHub Actions", "OIDC", "AWS Organizations", "SCP"],
       github: "https://github.com/ochirdorj/root_modules"
     },
     {
-      title: "Portfolio Site on AWS (S3 + CloudFront + Route 53)",
-      description: "This site. Static Next.js export deployed to S3, served globally via CloudFront CDN with HTTPS, DNS on Route 53. GitHub Actions builds and syncs on every push to main using OIDC federation — no AWS access keys stored anywhere. The pipeline: git push → npm build → S3 sync → CloudFront cache invalidation → live in seconds. The site itself proves the skills it lists.",
+      title: "Portfolio Site on AWS",
+      description: "Static Next.js export deployed to S3, served globally via CloudFront CDN with HTTPS, DNS on Route 53. GitHub Actions builds and syncs on every push to main using OIDC federation — no AWS access keys stored anywhere. The pipeline: git push → npm build → S3 sync → CloudFront cache invalidation → live in seconds.",
       tags: ["Next.js", "AWS S3", "CloudFront", "Route 53", "GitHub Actions", "OIDC"],
       github: "https://github.com/ochirdorj/portfolio"
-    },
-    {
-      title: "Microservices Monitoring Stack",
-      description: "Set up Prometheus and Grafana monitoring for a microservices application running on Kubernetes. Configured alerting rules and dashboards for CPU, memory, and request latency.",
-      tags: ["Prometheus", "Grafana", "Kubernetes", "Helm"],
-      github: "https://github.com/ochirdorj/monitoring-stack"
     },
     {
       title: "Infrastructure as Code with Terraform",
@@ -42,35 +63,20 @@ export const content = {
       tags: ["Terraform", "AWS", "EKS", "VPC", "RDS"],
       github: "https://github.com/ochirdorj/terraform-aws"
     },
-    {
-      title: "Dockerized Python API",
-      description: "Containerized a Python FastAPI application with PostgreSQL database. Includes docker-compose for local development and Kubernetes manifests for production deployment.",
-      tags: ["Python", "FastAPI", "Docker", "PostgreSQL", "Kubernetes"],
-      github: "https://github.com/ochirdorj/python-api"
-    }
   ],
 
   experience: [
     {
-      company: "Tech Solutions LLC",
+      company: "Akumo Solutions LLC",
       role: "DevOps Engineer",
-      period: "2023 — Present",
+      period: "2022 — Present",
       points: [
         "Migrated monolithic application to Kubernetes reducing deployment time by 70%",
         "Built CI/CD pipelines using GitHub Actions for 5 development teams",
         "Reduced AWS infrastructure costs by 40% through right-sizing and reserved instances"
-      ]
+      ],
+      tags: ["Kubernetes", "GitHub Actions", "AWS", "Helm", "ArgoCD"]
     },
-    {
-      company: "Cloud Startup Inc",
-      role: "Junior DevOps Engineer",
-      period: "2022 — 2023",
-      points: [
-        "Maintained and monitored AWS infrastructure including EC2, RDS, and S3",
-        "Wrote Ansible playbooks to automate server configuration",
-        "Set up centralized logging using ELK stack"
-      ]
-    }
   ],
 
   certifications: [
@@ -84,8 +90,8 @@ export const content = {
   ],
 
   contact: {
-    email: "alex.dorj@email.com",
+    email: "erdenetugs@gmail.com",
     github: "https://github.com/ochirdorj",
-    linkedin: "https://linkedin.com/in/alexdorj"
+    linkedin: "https://linkedin.com/in/tugsuucloud"
   }
 }
