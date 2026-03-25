@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# portfolio
 
-## Getting Started
+Personal portfolio website built with Next.js and deployed to AWS — fully automated from git push to live site in under 2 minutes.
 
-First, run the development server:
+**Live:** [tugsuu.click](https://tugsuu.click)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Pipeline
+
+```
+git push
+    ↓
+GitHub Actions — install deps, build Next.js
+    ↓
+Upload static files to AWS S3
+    ↓
+Invalidate CloudFront cache
+    ↓
+Live at https://tugsuu.click
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 + TypeScript |
+| Hosting | AWS S3 static website |
+| CDN | AWS CloudFront |
+| SSL | AWS Certificate Manager (free) |
+| DNS | AWS Route 53 |
+| CI/CD | GitHub Actions + OIDC |
+| Auth | OIDC — no long-lived credentials |
+| Cost | ~$0.50/month |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## How to update content
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All content lives in one file. To add a project, update skills, or change your bio — edit `data/content.ts` and push.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Edit content
+code data/content.ts
 
-## Deploy on Vercel
+# Deploy
+git add .
+git commit -m "update portfolio"
+git push
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+GitHub Actions handles the rest automatically.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Project structure
+
+```
+portfolio/
+├── app/
+│   ├── page.tsx          ← main page
+│   ├── layout.tsx        ← HTML wrapper
+│   └── globals.css       ← global styles
+├── data/
+│   └── content.ts        ← all content — edit this to update
+├── .github/
+│   └── workflows/
+│       └── deploy.yaml   ← CI/CD pipeline
+└── next.config.ts        ← static export config
+```
+
+---
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## AWS setup
+
+**S3** — static website hosting, public read access, us-east-1 region
+
+**ACM** — free SSL certificate, DNS validated via Route 53, us-east-1 region
+
+**CloudFront** — HTTPS termination, global CDN, connected to S3 origin
+
+**Route 53** — A and AAAA alias records pointing to CloudFront
+
+---
+
+## GitHub Actions secrets required
+
+| Secret | Value |
+|---|---|
+| `AWS_ROLE_ARN` | IAM role for OIDC authentication |
+| `AWS_REGION` | `us-east-1` |
+| `S3_BUCKET` | S3 bucket name |
+| `CLOUDFRONT_DISTRIBUTION_ID` | CloudFront distribution ID |
+
+---
+
+## Why S3 over Kubernetes
+
+A portfolio is static files — no server, no database. S3 + CloudFront costs $0.50/month vs $5-7/day for EKS. Same HTTPS, better global performance via CDN, zero maintenance.
+
+---
+
+## Related
+
+- [my-app](https://github.com/ochirdorj/my-app) — Node.js app deployed to AWS EKS via GitOps pipeline
+- [my-app-infra](https://github.com/ochirdorj/my-app-infra) — Kubernetes infrastructure repo managed by ArgoCD
