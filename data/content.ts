@@ -19,6 +19,12 @@ export const content = {
       infra: "https://github.com/ochirdorj/my-app-infra"
     },
     {
+      title: "Event-Driven Self-Hosted GitHub Actions Runners on AWS",
+      description: "Terraform monorepo that eliminates always-on CI/CD servers. When a GitHub workflow job is queued, a webhook hits API Gateway → a Node.js Lambda validates the HMAC-SHA256 signature → SQS buffers the event → a runner manager Lambda authenticates via GitHub App, tries Spot pricing first (on-demand fallback), and launches an ephemeral EC2 instance that registers as a runner, completes the job, and self-terminates. Pre-baked AMI (Node.js, Docker, Terraform, AWS CLI pre-installed) cuts cold-start to under 60 seconds. Idempotent EC2 launches via ClientToken prevent duplicate runners on SQS retry. Hash-based multi-AZ subnet selection spreads Spot capacity risk. SCP layer enforces mandatory tagging, region restriction, and root account lockdown org-wide as preventive controls. DRY: one reusable GitHub Actions workflow drives all 5 Terraform modules via OIDC — no static AWS keys anywhere.",
+      tags: ["Terraform", "AWS Lambda", "SQS", "API Gateway", "EC2 Spot", "GitHub Actions", "OIDC", "AWS Organizations", "SCP"],
+      github: "https://github.com/ochirdorj/root_modules"
+    },
+    {
       title: "Portfolio Site on AWS (S3 + CloudFront + Route 53)",
       description: "This site. Static Next.js export deployed to S3, served globally via CloudFront CDN with HTTPS, DNS on Route 53. GitHub Actions builds and syncs on every push to main using OIDC federation — no AWS access keys stored anywhere. The pipeline: git push → npm build → S3 sync → CloudFront cache invalidation → live in seconds. The site itself proves the skills it lists.",
       tags: ["Next.js", "AWS S3", "CloudFront", "Route 53", "GitHub Actions", "OIDC"],
