@@ -1,65 +1,178 @@
-import Image from "next/image";
+"use client";
+import { content } from "@/data/content";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [activeSection, setActiveSection] = useState("about");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ["about", "skills", "projects", "experience", "contact"];
+      for (const id of [...sections].reverse()) {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 120) {
+          setActiveSection(id);
+          break;
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navLink = (s: string) => ({
+    fontSize: 14,
+    color: activeSection === s ? "#000" : "#888",
+    textDecoration: "none",
+    fontWeight: activeSection === s ? 500 : 400,
+    transition: "color 0.15s",
+  } as React.CSSProperties);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main style={{
+      fontFamily: "Georgia, 'Times New Roman', serif",
+      background: "#fff",
+      color: "#1a1a1a",
+      minHeight: "100vh",
+      fontSize: 15,
+      lineHeight: 1.7,
+    }}>
+
+      {/* Nav */}
+      <nav style={{
+        position: "fixed", top: 0, width: "100%", zIndex: 50,
+        background: "rgba(255,255,255,0.9)",
+        backdropFilter: "blur(8px)",
+        borderBottom: "1px solid #f0f0f0",
+      }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 14, fontWeight: 500, color: "#111" }}>{content.name}</span>
+          <div style={{ display: "flex", gap: 24 }}>
+            {["about", "projects", "experience", "contact"].map(s => (
+              <a key={s} href={`#${s}`} style={navLink(s)}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </a>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* About */}
+      <section id="about" style={{ maxWidth: 640, margin: "0 auto", padding: "120px 24px 80px" }}>
+        <h1 style={{ fontSize: 24, fontWeight: 600, color: "#111", margin: "0 0 20px", letterSpacing: -0.5 }}>
+          {content.name}
+        </h1>
+        <p style={{ color: "#444", marginBottom: 16, lineHeight: 1.8 }}>
+          I am a <strong style={{ color: "#111", fontWeight: 500 }}>DevOps and Cloud Engineer</strong> based in {content.location}. I specialize in Kubernetes, AWS, and CI/CD pipelines — helping teams ship faster and more reliably.
+        </p>
+        <p style={{ color: "#444", marginBottom: 32, lineHeight: 1.8 }}>
+          I am currently looking for new opportunities. You can{" "}
+          <a href={content.contact.github} target="_blank" rel="noopener noreferrer" style={{ color: "#111", textDecoration: "underline", textDecorationColor: "#ccc" }}>
+            view my code
+          </a>
+          {", "}
+          <a href={content.contact.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: "#111", textDecoration: "underline", textDecorationColor: "#ccc" }}>
+            connect on LinkedIn
+          </a>
+          {", or "}
+          <a href={`mailto:${content.contact.email}`} style={{ color: "#111", textDecoration: "underline", textDecorationColor: "#ccc" }}>
+            reach out via email
+          </a>
+          .
+        </p>
+
+        {/* Skills inline */}
+        <div style={{ borderTop: "1px solid #f0f0f0", paddingTop: 24 }}>
+          <p style={{ fontSize: 13, color: "#888", marginBottom: 12, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Skills</p>
+          <p style={{ color: "#444", lineHeight: 2, fontSize: 14 }}>
+            {content.skills.join(" · ")}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Projects */}
+      <section id="projects" style={{ maxWidth: 640, margin: "0 auto", padding: "0 24px 80px", borderTop: "1px solid #f0f0f0" }}>
+        <p style={{ fontSize: 13, color: "#888", marginBottom: 24, paddingTop: 32, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Projects</p>
+        <div>
+          {content.projects.map((project) => (
+            <div key={project.title} style={{ marginBottom: 40 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 500, color: "#111", margin: 0 }}>
+                  {project.title}
+                </h3>
+                <div style={{ display: "flex", gap: 12, flexShrink: 0, marginLeft: 16 }}>
+                  {project.github && (
+                    <a href={project.github} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 13, color: "#888", textDecoration: "underline", textDecorationColor: "#ddd" }}>
+                      GitHub
+                    </a>
+                  )}
+                  {project.infra && (
+                    <a href={project.infra} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 13, color: "#888", textDecoration: "underline", textDecorationColor: "#ddd" }}>
+                      Infra
+                    </a>
+                  )}
+                </div>
+              </div>
+              <p style={{ fontSize: 14, color: "#666", margin: "0 0 8px", lineHeight: 1.7 }}>
+                {project.description}
+              </p>
+              <p style={{ fontSize: 13, color: "#aaa", margin: 0 }}>
+                {project.tags.join(" · ")}
+              </p>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Experience */}
+      <section id="experience" style={{ maxWidth: 640, margin: "0 auto", padding: "0 24px 80px", borderTop: "1px solid #f0f0f0" }}>
+        <p style={{ fontSize: 13, color: "#888", marginBottom: 24, paddingTop: 32, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Experience</p>
+        <div>
+          {content.experience.map((job) => (
+            <div key={job.company} style={{ marginBottom: 40 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 500, color: "#111", margin: 0 }}>{job.role}</h3>
+                <span style={{ fontSize: 13, color: "#aaa", flexShrink: 0, marginLeft: 16 }}>{job.period}</span>
+              </div>
+              <p style={{ fontSize: 14, color: "#888", margin: "0 0 12px" }}>{job.company}</p>
+              <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                {job.points.map(point => (
+                  <li key={point} style={{ fontSize: 14, color: "#666", lineHeight: 1.7, paddingLeft: 16, position: "relative" as const, marginBottom: 4 }}>
+                    <span style={{ position: "absolute" as const, left: 0, color: "#ccc" }}>—</span>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" style={{ maxWidth: 640, margin: "0 auto", padding: "0 24px 120px", borderTop: "1px solid #f0f0f0" }}>
+        <p style={{ fontSize: 13, color: "#888", marginBottom: 24, paddingTop: 32, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Contact</p>
+        <p style={{ fontSize: 15, color: "#444", lineHeight: 1.8, marginBottom: 20 }}>
+          I am open to new opportunities. Reach out via{" "}
+          <a href={`mailto:${content.contact.email}`} style={{ color: "#111", textDecoration: "underline", textDecorationColor: "#ccc" }}>
+            email
+          </a>
+          {" "}or connect on{" "}
+          <a href={content.contact.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: "#111", textDecoration: "underline", textDecorationColor: "#ccc" }}>
+            LinkedIn
+          </a>
+          .
+        </p>
+      </section>
+
+      {/* Footer */}
+      <footer style={{ borderTop: "1px solid #f0f0f0", padding: "24px", textAlign: "center" }}>
+        <p style={{ fontSize: 13, color: "#ccc", margin: 0 }}>
+          Built with Next.js · Deployed on AWS S3 + CloudFront
+        </p>
+      </footer>
+
+    </main>
   );
 }
