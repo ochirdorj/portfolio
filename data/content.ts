@@ -73,6 +73,16 @@ export const content = {
     }
   ],
 
+  certifications: [
+    "AWS Cloud Practitioner",
+    "AWS Solutions Architect",
+    "Kubernetes — KCNA",
+    "HashiCorp Terraform Associate",
+    "GitHub Actions Certified",
+    "Python — PCEP",
+    "Linux Essentials Certificate",
+  ],
+
   contact: {
     email: "alex.dorj@email.com",
     github: "https://github.com/ochirdorj",

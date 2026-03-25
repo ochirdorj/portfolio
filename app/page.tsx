@@ -15,7 +15,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["about", "skills", "projects", "experience", "contact"];
+      const sections = ["about", "skills", "projects", "experience", "certifications", "contact"];
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id);
         if (el && window.scrollY >= el.offsetTop - 120) {
@@ -157,22 +157,28 @@ export default function Home() {
             {content.name}
           </span>
           <div style={{ display: "flex", gap: 2 }}>
-            {["about", "projects", "experience", "contact"].map((s) => (
+            {([
+              ["about", "About"],
+              ["projects", "Projects"],
+              ["experience", "Experience"],
+              ["certifications", "Certs"],
+              ["contact", "Contact"],
+            ] as [string, string][]).map(([id, label]) => (
               <a
-                key={s}
-                href={`#${s}`}
+                key={id}
+                href={`#${id}`}
                 className="nav-item"
                 style={{
                   fontSize: 13,
-                  color: activeSection === s ? "#0a0a0a" : "#888",
+                  color: activeSection === id ? "#0a0a0a" : "#888",
                   textDecoration: "none",
-                  fontWeight: activeSection === s ? 500 : 400,
+                  fontWeight: activeSection === id ? 500 : 400,
                   padding: "5px 10px",
                   borderRadius: 6,
-                  background: activeSection === s ? "#efefef" : "transparent",
+                  background: activeSection === id ? "#efefef" : "transparent",
                 }}
               >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
+                {label}
               </a>
             ))}
           </div>
@@ -505,6 +511,60 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <hr style={divider} />
+
+        {/* ── Certifications ── */}
+        <section id="certifications" style={{ paddingTop: 48, paddingBottom: 64 }}>
+          <p style={sectionLabel}>Certifications</p>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              marginTop: 20,
+            }}
+          >
+            {content.certifications.map((cert) => (
+              <div
+                key={cert}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 16px",
+                  background: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 8,
+                }}
+              >
+                <span
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: "#f0fdf4",
+                    border: "1px solid #bbf7d0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    fontSize: 11,
+                    color: "#16a34a",
+                    fontWeight: 700,
+                  }}
+                >
+                  ✓
+                </span>
+                <span
+                  style={{ fontSize: 14, color: "#0a0a0a", fontWeight: 500 }}
+                >
+                  {cert}
+                </span>
               </div>
             ))}
           </div>
