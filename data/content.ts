@@ -40,7 +40,7 @@ export const content = {
   projects: [
     {
       title: "Production GitOps Pipeline on AWS EKS",
-      description: "Two-repo GitOps system for a Node.js 20 Express API. A git push triggers GitHub Actions: it authenticates to AWS via OIDC (no stored credentials), builds a Docker image tagged with the exact git SHA, pushes to ECR, then commits the new image tag into the infra repo. ArgoCD detects the commit, runs Helm, and issues a rolling update — old pod stays alive until the new one passes its readiness probe. Zero downtime, full audit trail, git revert = instant rollback. HPA auto-scales 1–5 replicas on CPU. Containers run as non-root; secrets never baked into images.",
+      description: "I got tired of manual deploys so I automated the whole thing. Push to main, GitHub Actions builds and pushes the image to ECR, ArgoCD deploys it to EKS with a rolling update so nothing goes down. Rollback is just git revert. Scales automatically under load.",
       tags: ["Kubernetes", "AWS EKS", "ArgoCD", "Helm", "GitHub Actions", "Docker", "OIDC", "HPA"],
       github: "https://github.com/ochirdorj/my-app",
       infra: "https://github.com/ochirdorj/my-app-infra"
