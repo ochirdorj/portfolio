@@ -63,10 +63,10 @@ export default function Home() {
           {content.name}
         </h1>
         <p style={{ color: "#444", marginBottom: 16, lineHeight: 1.8 }}>
-          I am a <strong style={{ color: "#111", fontWeight: 500 }}>DevOps and Cloud Engineer</strong> based in {content.location}. I specialize in Kubernetes, AWS, and CI/CD pipelines — helping teams ship faster and more reliably.
+          I'm a <strong style={{ color: "#111", fontWeight: 500 }}>DevOps / Cloud Engineer</strong> based in {content.location}. I mostly work with Kubernetes and AWS — setting up CI/CD pipelines, wiring up GitOps workflows, making deploys boring. That last part is genuinely the goal.
         </p>
         <p style={{ color: "#444", marginBottom: 32, lineHeight: 1.8 }}>
-          I am currently looking for new opportunities. You can{" "}
+          Currently open to new roles. You can{" "}
           <a href={content.contact.github} target="_blank" rel="noopener noreferrer" style={{ color: "#111", textDecoration: "underline", textDecorationColor: "#ccc" }}>
             view my code
           </a>
@@ -154,7 +154,7 @@ export default function Home() {
       <section id="contact" style={{ maxWidth: 640, margin: "0 auto", padding: "0 24px 120px", borderTop: "1px solid #f0f0f0" }}>
         <p style={{ fontSize: 13, color: "#888", marginBottom: 24, paddingTop: 32, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Contact</p>
         <p style={{ fontSize: 15, color: "#444", lineHeight: 1.8, marginBottom: 20 }}>
-          I am open to new opportunities. Reach out via{" "}
+          Open to new roles — feel free to reach out via{" "}
           <a href={`mailto:${content.contact.email}`} style={{ color: "#111", textDecoration: "underline", textDecorationColor: "#ccc" }}>
             email
           </a>
