@@ -11,9 +11,10 @@ const CYAN   = "#00c8ff";
 const BG     = "#0a0a0a";
 const CARD   = "#111111";
 const BORDER = "#1e1e1e";
-const TEXT   = "#e2e2e2";
-const DIM    = "#666666";
-const FAINT  = "#444444";
+const WHITE  = "#ffffff";         // primary text — headings, name, titles
+const TEXT   = "#c9d1e0";         // secondary text — body, descriptions
+const DIM    = "#8892a4";         // muted text — dates, labels, company names
+const FAINT  = "#6a7585";         // very muted — footer, terminal chrome
 
 // ── Static data ───────────────────────────────────────────────────────────────
 const LOAD_LINES = [
@@ -146,7 +147,7 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
           <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
           <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
           <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
-          <span style={{ marginLeft: 8, fontSize: 12, color: FAINT, fontFamily: MONO }}>
+          <span style={{ marginLeft: 8, fontSize: 13, color: FAINT, fontFamily: MONO }}>
             alex@portfolio:~
           </span>
         </div>
@@ -161,21 +162,21 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
             padding: "20px 22px",
             minHeight: 168,
             fontFamily: MONO,
-            fontSize: 13,
+            fontSize: 14,
           }}
         >
           {completedLines.map((line, i) => (
             <div key={i} style={{ marginBottom: 8, display: "flex", gap: 10, alignItems: "center" }}>
               <span style={{ color: CYAN, flexShrink: 0 }}>$</span>
-              <span style={{ color: "#999", flex: 1 }}>{line}</span>
-              <span style={{ color: "#22c55e", fontSize: 12, flexShrink: 0 }}>✓</span>
+              <span style={{ color: TEXT, flex: 1 }}>{line}</span>
+              <span style={{ color: "#22c55e", fontSize: 13, flexShrink: 0 }}>✓</span>
             </div>
           ))}
 
           {phase === "typing" && (
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <span style={{ color: CYAN, flexShrink: 0 }}>$</span>
-              <span style={{ color: TEXT }}>
+              <span style={{ color: WHITE }}>
                 {currentText}
                 <span
                   style={{
@@ -195,8 +196,8 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
           {(phase === "progress" || phase === "fadeout") && (
             <div style={{ marginTop: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ color: CYAN, fontSize: 12 }}>$ npm run deploy --prod</span>
-                <span style={{ color: DIM, fontSize: 12, fontVariantNumeric: "tabular-nums" }}>
+                <span style={{ color: CYAN, fontSize: 13 }}>$ npm run deploy --prod</span>
+                <span style={{ color: DIM, fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
                   {Math.floor(progress)}%
                 </span>
               </div>
@@ -226,7 +227,7 @@ function SectionHeader({ label }: { label: string }) {
     <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
       <span
         style={{
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: 600,
           color: CYAN,
           fontFamily: MONO,
@@ -301,12 +302,12 @@ export default function Home() {
     return () => observer.disconnect();
   }, [loaded]);
 
-  const projects    = content.projects as ProjectItem[];
-  const experience  = content.experience as ExperienceItem[];
+  const projects   = content.projects as ProjectItem[];
+  const experience = content.experience as ExperienceItem[];
 
-  // Shared style objects
+  // Tag pill — font size bumped to 13, colors passed in
   const tagPill = (color: string, bg: string, border: string): React.CSSProperties => ({
-    fontSize: 11,
+    fontSize: 13,
     color,
     background: bg,
     border: `1px solid ${border}`,
@@ -378,14 +379,14 @@ export default function Home() {
           text-decoration: none;
           padding: 5px 9px;
           border-radius: 6px;
-          font-size: 13px;
+          font-size: 14px;
           transition: color 0.15s, background 0.15s;
         }
-        .nav-a:hover { color: ${TEXT} !important; background: rgba(255,255,255,0.05) !important; }
+        .nav-a:hover { color: ${WHITE} !important; background: rgba(255,255,255,0.05) !important; }
 
         /* Project links */
         .proj-a {
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 500;
           text-decoration: none;
           color: ${DIM};
@@ -400,21 +401,21 @@ export default function Home() {
         .btn-ghost { transition: background 0.15s, border-color 0.15s; }
         .btn-ghost:hover { background: rgba(255,255,255,0.05) !important; border-color: #333 !important; }
 
-        /* Contact link rows */
+        /* Contact / CTA rows */
         .contact-row {
           display: inline-flex;
           align-items: center;
           gap: 10px;
           padding: 13px 22px;
           border-radius: 8px;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 500;
           text-decoration: none;
           transition: background 0.15s, border-color 0.15s;
         }
 
         @media (max-width: 600px) {
-          .nav-a    { padding: 4px 6px !important; font-size: 11px !important; }
+          .nav-a    { padding: 4px 6px !important; font-size: 12px !important; }
           .hero-h1  { font-size: 38px !important; letter-spacing: -1.2px !important; }
           .skills-g { grid-template-columns: 1fr !important; }
           .certs-g  { grid-template-columns: 1fr !important; }
@@ -433,7 +434,7 @@ export default function Home() {
             color: TEXT,
             minHeight: "100vh",
             fontSize: 15,
-            lineHeight: 1.75,
+            lineHeight: 1.8,
           }}
         >
           {/* ── Nav ───────────────────────────────────────────── */}
@@ -460,7 +461,7 @@ export default function Home() {
                 height: 52,
               }}
             >
-              <span style={{ fontSize: 14, fontWeight: 600, color: TEXT, fontFamily: MONO }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: WHITE, fontFamily: MONO }}>
                 {content.name}{" "}
                 <span style={{ color: CYAN }}>~</span>
               </span>
@@ -522,7 +523,7 @@ export default function Home() {
                     boxShadow: "0 0 6px #22c55e88",
                   }}
                 />
-                <span style={{ fontSize: 12, color: "#4ade80", fontWeight: 500, fontFamily: MONO }}>
+                <span style={{ fontSize: 13, color: "#4ade80", fontWeight: 500, fontFamily: MONO }}>
                   open to new roles
                 </span>
               </div>
@@ -531,12 +532,12 @@ export default function Home() {
                 className="hero-h1"
                 style={{
                   fontSize: 56,
-                  fontWeight: 700,
-                  color: "#f5f5f5",
+                  fontWeight: 800,
+                  color: WHITE,
                   margin: "0 0 12px",
                   letterSpacing: "-2.5px",
-                  lineHeight: 1.08,
-                  minHeight: "1.08em",
+                  lineHeight: 1.1,
+                  minHeight: "1.1em",
                 }}
               >
                 {typedName}
@@ -556,10 +557,10 @@ export default function Home() {
                 )}
               </h1>
 
-              <p style={{ fontSize: 18, color: DIM, margin: "0 0 22px", letterSpacing: "-0.3px" }}>
+              <p style={{ fontSize: 18, color: DIM, margin: "0 0 22px", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
                 {content.title}
               </p>
-              <p style={{ fontSize: 15, color: "#777", margin: 0, lineHeight: 1.85, maxWidth: 580 }}>
+              <p style={{ fontSize: 15, color: TEXT, margin: 0, lineHeight: 1.8, maxWidth: 580 }}>
                 {content.about}
               </p>
 
@@ -584,7 +585,7 @@ export default function Home() {
                   className="btn-ghost contact-row"
                   style={{
                     background: "transparent",
-                    color: TEXT,
+                    color: WHITE,
                     border: `1px solid ${BORDER}`,
                   }}
                 >
@@ -612,7 +613,7 @@ export default function Home() {
                     <div key={cat.name} className="s-card">
                       <p
                         style={{
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: 600,
                           color: CYAN,
                           margin: "0 0 12px",
@@ -627,8 +628,8 @@ export default function Home() {
                           <span
                             key={s}
                             style={{
-                              fontSize: 12,
-                              color: "#999",
+                              fontSize: 13,
+                              color: TEXT,
                               background: "rgba(255,255,255,0.03)",
                               border: "1px solid #272727",
                               borderRadius: 4,
@@ -672,11 +673,11 @@ export default function Home() {
                       >
                         <h3
                           style={{
-                            fontSize: 15,
+                            fontSize: 17,
                             fontWeight: 600,
-                            color: "#f0f0f0",
+                            color: WHITE,
                             margin: 0,
-                            lineHeight: 1.4,
+                            lineHeight: 1.2,
                           }}
                         >
                           {project.title}
@@ -706,8 +707,8 @@ export default function Home() {
                       </div>
                       <p
                         style={{
-                          fontSize: 14,
-                          color: "#777",
+                          fontSize: 15,
+                          color: TEXT,
                           margin: "0 0 16px",
                           lineHeight: 1.8,
                         }}
@@ -756,22 +757,23 @@ export default function Home() {
                         <div>
                           <h3
                             style={{
-                              fontSize: 15,
+                              fontSize: 17,
                               fontWeight: 600,
-                              color: "#f0f0f0",
+                              color: WHITE,
                               margin: 0,
+                              lineHeight: 1.2,
                             }}
                           >
                             {job.role}
                           </h3>
-                          <p style={{ fontSize: 14, color: DIM, margin: "3px 0 0" }}>
+                          <p style={{ fontSize: 15, color: DIM, margin: "4px 0 0" }}>
                             {job.company}
                           </p>
                         </div>
                         <span
                           style={{
-                            fontSize: 12,
-                            color: "#555",
+                            fontSize: 13,
+                            color: DIM,
                             fontFamily: MONO,
                             border: "1px solid #222",
                             borderRadius: 4,
@@ -797,9 +799,9 @@ export default function Home() {
                           <li
                             key={point}
                             style={{
-                              fontSize: 14,
-                              color: "#888",
-                              lineHeight: 1.75,
+                              fontSize: 15,
+                              color: TEXT,
+                              lineHeight: 1.8,
                               display: "flex",
                               gap: 10,
                               alignItems: "flex-start",
@@ -832,7 +834,7 @@ export default function Home() {
                           }}
                         >
                           {job.tags.map(tag => (
-                            <span key={tag} style={tagPill("#666", "rgba(255,255,255,0.02)", "#252525")}>
+                            <span key={tag} style={tagPill(DIM, "rgba(255,255,255,0.02)", "#252525")}>
                               {tag}
                             </span>
                           ))}
@@ -881,9 +883,9 @@ export default function Home() {
                       <div style={{ minWidth: 0 }}>
                         <p
                           style={{
-                            fontSize: 14,
+                            fontSize: 15,
                             fontWeight: 500,
-                            color: "#ddd",
+                            color: WHITE,
                             margin: 0,
                             lineHeight: 1.3,
                           }}
@@ -892,8 +894,8 @@ export default function Home() {
                         </p>
                         <p
                           style={{
-                            fontSize: 12,
-                            color: "#555",
+                            fontSize: 13,
+                            color: DIM,
                             margin: "3px 0 0",
                             fontFamily: MONO,
                           }}
@@ -916,8 +918,8 @@ export default function Home() {
                 <p
                   style={{
                     fontSize: 15,
-                    color: "#777",
-                    lineHeight: 1.85,
+                    color: TEXT,
+                    lineHeight: 1.8,
                     margin: "20px 0 32px",
                     maxWidth: 500,
                   }}
@@ -944,7 +946,7 @@ export default function Home() {
                     className="btn-ghost contact-row"
                     style={{
                       background: "transparent",
-                      color: TEXT,
+                      color: WHITE,
                       border: `1px solid ${BORDER}`,
                     }}
                   >
@@ -957,7 +959,7 @@ export default function Home() {
                     className="btn-ghost contact-row"
                     style={{
                       background: "transparent",
-                      color: TEXT,
+                      color: WHITE,
                       border: `1px solid ${BORDER}`,
                     }}
                   >
@@ -976,7 +978,7 @@ export default function Home() {
               textAlign: "center" as const,
             }}
           >
-            <p style={{ fontSize: 12, color: FAINT, margin: 0, fontFamily: MONO }}>
+            <p style={{ fontSize: 13, color: FAINT, margin: 0, fontFamily: MONO }}>
               Built with Next.js · Deployed on AWS S3 + CloudFront
             </p>
           </footer>
