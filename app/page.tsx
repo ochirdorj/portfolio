@@ -1,6 +1,69 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { content } from "@/data/content";
+import {
+  SiKubernetes, SiHelm, SiArgo, SiDocker, SiTerraform,
+  SiGithubactions, SiNodedotjs, SiPython, SiLinux, SiGit,
+  SiFastapi, SiGnubash,
+} from "react-icons/si";
+import { FaAws } from "react-icons/fa";
+
+type IconComponent = React.ComponentType<{ size?: number; color?: string }>;
+
+// Map skill names → icon component
+const SKILL_ICONS: Record<string, IconComponent> = {
+  // Kubernetes ecosystem
+  "Kubernetes":       SiKubernetes,
+  "AWS EKS":          SiKubernetes,
+  "EKS":              SiKubernetes,
+  "HPA":              SiKubernetes,
+  "RBAC":             SiKubernetes,
+  "Rolling deploys":  SiKubernetes,
+  "Readiness probes": SiKubernetes,
+  // Helm
+  "Helm Charts":      SiHelm,
+  "Helm":             SiHelm,
+  // ArgoCD
+  "ArgoCD":           SiArgo,
+  "ArgoCD sync":      SiArgo,
+  // Docker
+  "Docker":           SiDocker,
+  "Multi-stage builds": SiDocker,
+  "Non-root user":    SiDocker,
+  "Layer caching":    SiDocker,
+  "dockerignore":     SiDocker,
+  "ECR":              SiDocker,
+  "ECR push":         SiDocker,
+  // Terraform
+  "Terraform":        SiTerraform,
+  "Reusable modules": SiTerraform,
+  "Remote state":     SiTerraform,
+  // GitHub Actions
+  "GitHub Actions":   SiGithubactions,
+  "Self-hosted runners": SiGithubactions,
+  // AWS
+  "AWS":              FaAws,
+  "S3":               FaAws,
+  "CloudFront":       FaAws,
+  "Route 53":         FaAws,
+  "ACM":              FaAws,
+  "IAM":              FaAws,
+  "API Gateway":      FaAws,
+  "Lambda":           FaAws,
+  "SQS":              FaAws,
+  "AWS S3":           FaAws,
+  "AWS CloudFront":   FaAws,
+  "AWS Route 53":     FaAws,
+  "AWS Organizations": FaAws,
+  "SCP":              FaAws,
+  // Languages & Tools
+  "Node.js":          SiNodedotjs,
+  "Python":           SiPython,
+  "Linux":            SiLinux,
+  "Git":              SiGit,
+  "FastAPI":          SiFastapi,
+  "Bash":             SiGnubash,
+};
 
 // ─── Intersection Observer hook ───────────────────────────────────────────────
 function useInView() {
@@ -388,18 +451,23 @@ export default function Home() {
                     {cat.name}
                   </h3>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {cat.subskills.map(s => (
-                      <span
-                        key={s}
-                        style={{
-                          fontSize: 12, padding: "4px 12px",
-                          background: C.tagBg, color: C.blue200,
-                          border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
-                        }}
-                      >
-                        {s}
-                      </span>
-                    ))}
+                    {cat.subskills.map(s => {
+                      const Icon = SKILL_ICONS[s];
+                      return (
+                        <span
+                          key={s}
+                          style={{
+                            fontSize: 12, padding: "4px 12px",
+                            background: C.tagBg, color: C.blue200,
+                            border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
+                            display: "inline-flex", alignItems: "center", gap: 5,
+                          }}
+                        >
+                          {Icon && <Icon size={12} />}
+                          {s}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               </FadeIn>
@@ -463,18 +531,23 @@ export default function Home() {
                   </div>
                   <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.85, margin: "0 0 18px" }}>{project.description}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {project.tags.map(tag => (
-                      <span
-                        key={tag}
-                        style={{
-                          fontSize: 12, padding: "3px 12px",
-                          background: C.tagBg, color: C.blue200,
-                          border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    {project.tags.map(tag => {
+                      const Icon = SKILL_ICONS[tag];
+                      return (
+                        <span
+                          key={tag}
+                          style={{
+                            fontSize: 12, padding: "3px 12px",
+                            background: C.tagBg, color: C.blue200,
+                            border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
+                            display: "inline-flex", alignItems: "center", gap: 5,
+                          }}
+                        >
+                          {Icon && <Icon size={11} />}
+                          {tag}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               </FadeIn>
@@ -524,18 +597,23 @@ export default function Home() {
                   </ul>
                   {job.tags && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      {job.tags.map(tag => (
-                        <span
-                          key={tag}
-                          style={{
-                            fontSize: 12, padding: "3px 12px",
-                            background: C.tagBg, color: C.blue200,
-                            border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      {job.tags.map(tag => {
+                        const Icon = SKILL_ICONS[tag];
+                        return (
+                          <span
+                            key={tag}
+                            style={{
+                              fontSize: 12, padding: "3px 12px",
+                              background: C.tagBg, color: C.blue200,
+                              border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
+                              display: "inline-flex", alignItems: "center", gap: 5,
+                            }}
+                          >
+                            {Icon && <Icon size={11} />}
+                            {tag}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
