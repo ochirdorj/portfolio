@@ -2,7 +2,7 @@ export const content = {
   name: "Alex Dorj",
   title: "DevOps / Cloud Engineer * AWS * Kubernetes",
   location: "Ulaanbaatar, Mongolia",
-  about: "I am a DevOps and Cloud Engineer passionate about building reliable, automated infrastructure. I specialize in Kubernetes, AWS, and CI/CD pipelines. Currently looking for opportunities to help teams ship faster and more reliably.",
+  about: "I'm a DevOps / Cloud Engineer who likes working on the infrastructure side of things. Mostly Kubernetes, AWS, and CI/CD — making deploys fast and boring is kind of my thing. Looking for a team where that work actually matters.",
 
   skills: [
     "Kubernetes", "Docker", "AWS EKS", "AWS ECR", "AWS S3",
@@ -12,16 +12,16 @@ export const content = {
 
   projects: [
     {
-      title: "Production CI/CD Pipeline on AWS EKS",
-      description: "Built a complete GitOps-based deployment pipeline for a Node.js application. Every git push automatically builds a Docker image, pushes to ECR, and deploys to Kubernetes via ArgoCD — with zero downtime rolling deploys and instant rollback capability.",
-      tags: ["Kubernetes", "Docker", "AWS EKS", "ArgoCD", "Helm", "GitHub Actions"],
+      title: "Production GitOps Pipeline on AWS EKS",
+      description: "Two-repo GitOps system for a Node.js 20 Express API. A git push triggers GitHub Actions: it authenticates to AWS via OIDC (no stored credentials), builds a Docker image tagged with the exact git SHA, pushes to ECR, then commits the new image tag into the infra repo. ArgoCD detects the commit, runs Helm, and issues a rolling update — old pod stays alive until the new one passes its readiness probe. Zero downtime, full audit trail, git revert = instant rollback. HPA auto-scales 1–5 replicas on CPU. Containers run as non-root; secrets never baked into images.",
+      tags: ["Kubernetes", "AWS EKS", "ArgoCD", "Helm", "GitHub Actions", "Docker", "OIDC", "HPA"],
       github: "https://github.com/ochirdorj/my-app",
       infra: "https://github.com/ochirdorj/my-app-infra"
     },
     {
-      title: "Portfolio Website testing",
-      description: "Personal portfolio website built with Next.js and deployed to AWS S3 with CloudFront CDN and Route 53 DNS. Fully automated deployment pipeline via GitHub Actions.",
-      tags: ["Next.js", "AWS S3", "CloudFront", "Route 53", "GitHub Actions"],
+      title: "Portfolio Site on AWS (S3 + CloudFront + Route 53)",
+      description: "This site. Static Next.js export deployed to S3, served globally via CloudFront CDN with HTTPS, DNS on Route 53. GitHub Actions builds and syncs on every push to main using OIDC federation — no AWS access keys stored anywhere. The pipeline: git push → npm build → S3 sync → CloudFront cache invalidation → live in seconds. The site itself proves the skills it lists.",
+      tags: ["Next.js", "AWS S3", "CloudFront", "Route 53", "GitHub Actions", "OIDC"],
       github: "https://github.com/ochirdorj/portfolio"
     },
     {
