@@ -7,14 +7,16 @@ const FONT =
   "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const MONO =
   "var(--font-geist-mono), 'Courier New', monospace";
-const CYAN   = "#00c8ff";
-const BG     = "#0a0a0a";
-const CARD   = "#111111";
-const BORDER = "#1e1e1e";
-const WHITE  = "#ffffff";         // primary text — headings, name, titles
-const TEXT   = "#c9d1e0";         // secondary text — body, descriptions
-const DIM    = "#8892a4";         // muted text — dates, labels, company names
-const FAINT  = "#6a7585";         // very muted — footer, terminal chrome
+const CYAN    = "#00bfff";        // accent — links, tags, highlights
+const BG      = "#0d1117";        // main background — dark navy
+const CARD    = "#161b22";        // card background — slightly lighter navy
+const BORDER  = "#30363d";        // card borders — subtle gray-blue
+const TAG_BG  = "#0d2137";        // tech pill background — dark blue tint
+const TAG_BRD = "#1e4976";        // tech pill border — subtle cyan border
+const WHITE   = "#ffffff";        // primary text — headings, titles, name
+const TEXT    = "#c9d1e0";        // secondary text — body, descriptions
+const DIM     = "#8b949e";        // muted text — dates, labels, company
+const FAINT   = "#6a7585";        // very muted — footer
 
 // ── Static data ───────────────────────────────────────────────────────────────
 const LOAD_LINES = [
@@ -135,7 +137,7 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
         {/* Window chrome */}
         <div
           style={{
-            background: "#161616",
+            background: CARD,
             border: `1px solid ${BORDER}`,
             borderRadius: "10px 10px 0 0",
             padding: "10px 16px",
@@ -155,7 +157,7 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
         {/* Terminal body */}
         <div
           style={{
-            background: "#0d0d0d",
+            background: "#090d12",
             border: `1px solid ${BORDER}`,
             borderTop: "none",
             borderRadius: "0 0 10px 10px",
@@ -201,12 +203,12 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
                   {Math.floor(progress)}%
                 </span>
               </div>
-              <div style={{ background: "#1a1a1a", borderRadius: 4, height: 4, overflow: "hidden" }}>
+              <div style={{ background: "#1c2128", borderRadius: 4, height: 4, overflow: "hidden" }}>
                 <div
                   style={{
                     height: "100%",
                     width: `${progress}%`,
-                    background: `linear-gradient(90deg, ${CYAN}, #0099cc)`,
+                    background: `linear-gradient(90deg, ${CYAN}, #0080cc)`,
                     borderRadius: 4,
                     transition: "width 0.04s linear",
                     boxShadow: `0 0 10px ${CYAN}55`,
@@ -225,19 +227,11 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
 function SectionHeader({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
-      <span
-        style={{
-          fontSize: 13,
-          fontWeight: 600,
-          color: CYAN,
-          fontFamily: MONO,
-          letterSpacing: "1.5px",
-          whiteSpace: "nowrap" as const,
-        }}
-      >
-        {`// ${label.toUpperCase()}`}
+      <span style={{ whiteSpace: "nowrap" as const, fontFamily: MONO, letterSpacing: "1.5px" }}>
+        <span style={{ color: CYAN, fontSize: 13, fontWeight: 600 }}>{"// "}</span>
+        <span style={{ color: WHITE, fontSize: 13, fontWeight: 700 }}>{label.toUpperCase()}</span>
       </span>
-      <div style={{ flex: 1, height: 1, background: BORDER }} />
+      <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${CYAN}55, transparent)` }} />
     </div>
   );
 }
@@ -305,7 +299,6 @@ export default function Home() {
   const projects   = content.projects as ProjectItem[];
   const experience = content.experience as ExperienceItem[];
 
-  // Tag pill — font size bumped to 13, colors passed in
   const tagPill = (color: string, bg: string, border: string): React.CSSProperties => ({
     fontSize: 13,
     color,
@@ -340,9 +333,9 @@ export default function Home() {
           transition: border-color 0.2s, box-shadow 0.2s;
         }
         .p-card:hover {
-          border-color: rgba(0,200,255,0.4);
-          box-shadow: 0 0 0 1px rgba(0,200,255,0.07),
-                      0 8px 32px rgba(0,200,255,0.08);
+          border-color: rgba(0,191,255,0.45);
+          box-shadow: 0 0 0 1px rgba(0,191,255,0.08),
+                      0 8px 32px rgba(0,191,255,0.1);
         }
 
         /* Skill cards */
@@ -372,7 +365,7 @@ export default function Home() {
           gap: 14px;
           transition: border-color 0.2s;
         }
-        .c-card:hover { border-color: rgba(0,200,255,0.3); }
+        .c-card:hover { border-color: rgba(0,191,255,0.4); }
 
         /* Nav links */
         .nav-a {
@@ -382,7 +375,10 @@ export default function Home() {
           font-size: 14px;
           transition: color 0.15s, background 0.15s;
         }
-        .nav-a:hover { color: ${WHITE} !important; background: rgba(255,255,255,0.05) !important; }
+        .nav-a:hover {
+          color: ${WHITE} !important;
+          background: rgba(0,191,255,0.08) !important;
+        }
 
         /* Project links */
         .proj-a {
@@ -395,11 +391,24 @@ export default function Home() {
         }
         .proj-a:hover { color: ${CYAN} !important; }
 
-        /* Buttons */
-        .btn-cyan { transition: opacity 0.15s; }
-        .btn-cyan:hover { opacity: 0.85; }
-        .btn-ghost { transition: background 0.15s, border-color 0.15s; }
-        .btn-ghost:hover { background: rgba(255,255,255,0.05) !important; border-color: #333 !important; }
+        /* Primary button — outline style, fills on hover */
+        .btn-cyan {
+          transition: background 0.18s, color 0.18s, border-color 0.18s;
+        }
+        .btn-cyan:hover {
+          background: ${CYAN} !important;
+          color: #000 !important;
+          border-color: ${CYAN} !important;
+        }
+
+        /* Ghost / secondary button */
+        .btn-ghost {
+          transition: background 0.15s, border-color 0.15s;
+        }
+        .btn-ghost:hover {
+          background: rgba(0,191,255,0.06) !important;
+          border-color: ${BORDER} !important;
+        }
 
         /* Contact / CTA rows */
         .contact-row {
@@ -444,7 +453,7 @@ export default function Home() {
               top: 0,
               width: "100%",
               zIndex: 50,
-              background: "rgba(10,10,10,0.88)",
+              background: "rgba(13,17,23,0.9)",
               backdropFilter: "blur(14px)",
               WebkitBackdropFilter: "blur(14px)",
               borderBottom: `1px solid ${BORDER}`,
@@ -485,7 +494,7 @@ export default function Home() {
                       fontWeight: activeSection === id ? 500 : 400,
                       background:
                         activeSection === id
-                          ? "rgba(0,200,255,0.07)"
+                          ? "rgba(0,191,255,0.08)"
                           : "transparent",
                     }}
                   >
@@ -506,8 +515,8 @@ export default function Home() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 7,
-                  border: "1px solid rgba(0,200,255,0.22)",
-                  background: "rgba(0,200,255,0.05)",
+                  border: "1px solid rgba(0,191,255,0.22)",
+                  background: "rgba(0,191,255,0.05)",
                   borderRadius: 20,
                   padding: "4px 14px",
                   marginBottom: 28,
@@ -568,12 +577,13 @@ export default function Home() {
                 className="hero-cta"
                 style={{ display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 36 }}
               >
+                {/* Primary — cyan outline, fills on hover */}
                 <a
                   href="#projects"
                   className="btn-cyan contact-row"
                   style={{
-                    background: CYAN,
-                    color: "#000",
+                    background: "transparent",
+                    color: CYAN,
                     border: `1px solid ${CYAN}`,
                     fontWeight: 700,
                   }}
@@ -629,9 +639,9 @@ export default function Home() {
                             key={s}
                             style={{
                               fontSize: 13,
-                              color: TEXT,
-                              background: "rgba(255,255,255,0.03)",
-                              border: "1px solid #272727",
+                              color: CYAN,
+                              background: TAG_BG,
+                              border: `1px solid ${TAG_BRD}`,
                               borderRadius: 4,
                               padding: "3px 9px",
                             }}
@@ -717,7 +727,7 @@ export default function Home() {
                       </p>
                       <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
                         {project.tags.map(tag => (
-                          <span key={tag} style={tagPill(CYAN, "rgba(0,200,255,0.06)", "rgba(0,200,255,0.2)")}>
+                          <span key={tag} style={tagPill(CYAN, TAG_BG, TAG_BRD)}>
                             {tag}
                           </span>
                         ))}
@@ -775,7 +785,7 @@ export default function Home() {
                             fontSize: 13,
                             color: DIM,
                             fontFamily: MONO,
-                            border: "1px solid #222",
+                            border: `1px solid ${BORDER}`,
                             borderRadius: 4,
                             padding: "3px 9px",
                             flexShrink: 0,
@@ -830,11 +840,11 @@ export default function Home() {
                             gap: 6,
                             marginTop: 16,
                             paddingTop: 16,
-                            borderTop: "1px solid #1a1a1a",
+                            borderTop: `1px solid ${BORDER}`,
                           }}
                         >
                           {job.tags.map(tag => (
-                            <span key={tag} style={tagPill(DIM, "rgba(255,255,255,0.02)", "#252525")}>
+                            <span key={tag} style={tagPill(DIM, CARD, BORDER)}>
                               {tag}
                             </span>
                           ))}
@@ -868,8 +878,8 @@ export default function Home() {
                           width: 34,
                           height: 34,
                           borderRadius: 8,
-                          background: "rgba(0,200,255,0.07)",
-                          border: "1px solid rgba(0,200,255,0.2)",
+                          background: TAG_BG,
+                          border: `1px solid ${TAG_BRD}`,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -931,8 +941,8 @@ export default function Home() {
                     href={`mailto:${content.contact.email}`}
                     className="btn-cyan contact-row"
                     style={{
-                      background: CYAN,
-                      color: "#000",
+                      background: "transparent",
+                      color: CYAN,
                       border: `1px solid ${CYAN}`,
                       fontWeight: 700,
                     }}
