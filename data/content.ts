@@ -19,7 +19,7 @@ export const content = {
       infra: "https://github.com/ochirdorj/my-app-infra"
     },
     {
-      title: "Portfolio Website",
+      title: "Portfolio Website testing",
       description: "Personal portfolio website built with Next.js and deployed to AWS S3 with CloudFront CDN and Route 53 DNS. Fully automated deployment pipeline via GitHub Actions.",
       tags: ["Next.js", "AWS S3", "CloudFront", "Route 53", "GitHub Actions"],
       github: "https://github.com/ochirdorj/portfolio"
