@@ -1,999 +1,656 @@
 "use client";
+import { useEffect, useState, useRef } from "react";
 import { content } from "@/data/content";
-import { useEffect, useState } from "react";
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const FONT =
-  "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const MONO =
-  "var(--font-geist-mono), 'Courier New', monospace";
-const CYAN    = "#00bfff";        // accent — links, tags, highlights
-const BG      = "#0d1117";        // main background — dark navy
-const CARD    = "#161b22";        // card background — slightly lighter navy
-const BORDER  = "#30363d";        // card borders — subtle gray-blue
-const TAG_BG  = "#0d2137";        // tech pill background — dark blue tint
-const TAG_BRD = "#1e4976";        // tech pill border — subtle cyan border
-const WHITE   = "#ffffff";        // primary text — headings, titles, name
-const TEXT    = "#c9d1e0";        // secondary text — body, descriptions
-const DIM     = "#8b949e";        // muted text — dates, labels, company
-const FAINT   = "#6a7585";        // very muted — footer
+// ─── Intersection Observer hook ───────────────────────────────────────────────
+function useInView() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setInView(true); },
+      { threshold: 0.1 }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return { ref, inView };
+}
 
-// ── Static data ───────────────────────────────────────────────────────────────
-const LOAD_LINES = [
+function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  const { ref, inView } = useInView();
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ─── Static data ──────────────────────────────────────────────────────────────
+const LOADING_LINES = [
   "Initializing cloud infrastructure...",
   "Loading CI/CD pipeline...",
   "Configuring Kubernetes cluster...",
   "Deploying portfolio...",
 ];
 
-const CERT_ISSUERS: Record<string, string> = {
-  "AWS Cloud Practitioner":        "Amazon Web Services",
-  "AWS Solutions Architect":       "Amazon Web Services",
-  "Kubernetes — KCNA":             "Cloud Native Computing Foundation",
-  "HashiCorp Terraform Associate": "HashiCorp",
-  "GitHub Actions Certified":      "GitHub",
-  "Python — PCEP":                 "Python Institute",
-  "Linux Essentials Certificate":  "Linux Professional Institute",
+const skillCategories = [
+  { name: "Kubernetes & GitOps", subskills: ["AWS EKS", "Helm Charts", "ArgoCD", "HPA", "RBAC", "Rolling deploys"] },
+  { name: "AWS", subskills: ["EKS", "ECR", "S3", "CloudFront", "Route 53", "ACM", "IAM", "API Gateway", "Lambda", "SQS"] },
+  { name: "CI/CD & Automation", subskills: ["GitHub Actions", "OIDC auth", "ECR push", "ArgoCD sync", "Multi-env promotion", "Self-hosted runners"] },
+  { name: "Infrastructure as Code", subskills: ["Terraform", "Reusable modules", "Remote state", "AWS Organizations", "SCP"] },
+  { name: "Docker & Containers", subskills: ["Multi-stage builds", "Non-root user", "Layer caching", "dockerignore"] },
+  { name: "Languages & Tools", subskills: ["Node.js", "Python", "Bash", "Git", "Linux", "FastAPI"] },
+];
+
+const certifications = [
+  { name: "AWS Cloud Practitioner", issuer: "Amazon Web Services" },
+  { name: "AWS Solutions Architect", issuer: "Amazon Web Services" },
+  { name: "Kubernetes — KCNA", issuer: "Cloud Native Computing Foundation" },
+  { name: "HashiCorp Terraform Associate", issuer: "HashiCorp" },
+  { name: "GitHub Actions Certified", issuer: "GitHub" },
+  { name: "Python — PCEP", issuer: "Python Institute" },
+  { name: "Linux Essentials Certificate", issuer: "LPI" },
+];
+
+// ─── AstroWind-inspired dark color palette ────────────────────────────────────
+const C = {
+  bg:          "#030620",               // very dark navy
+  card:        "#0f172a",               // slate-900
+  border:      "rgba(255,255,255,0.10)",
+  borderHover: "rgba(255,255,255,0.22)",
+  primary:     "#0161ef",               // AstroWind primary blue
+  primaryHov:  "#0154cf",
+  heading:     "#f7f8f8",
+  text:        "#e5ecf6",
+  muted:       "rgba(229,236,246,0.60)",
+  blue200:     "#bfdbfe",
+  tagBg:       "rgba(1,97,239,0.12)",
+  tagBorder:   "rgba(1,97,239,0.35)",
+  nav:         "rgba(3,6,32,0.88)",
 };
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-type ProjectItem = {
-  title: string;
-  description: string;
-  tags: string[];
-  github?: string;
-  infra?: string;
-};
-
-type ExperienceItem = {
-  company: string;
-  role: string;
-  period: string;
-  points: string[];
-  tags?: string[];
-};
-
-// ── Loading screen ────────────────────────────────────────────────────────────
-function LoadingScreen({ onDone }: { onDone: () => void }) {
-  const [completedLines, setCompletedLines] = useState<string[]>([]);
-  const [currentText, setCurrentText]       = useState("");
-  const [phase, setPhase]                   = useState<"typing" | "progress" | "fadeout">("typing");
-  const [progress, setProgress]             = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout>;
-    let interval: ReturnType<typeof setInterval>;
-
-    let lineIdx = 0;
-    let charIdx = 0;
-
-    const typeChar = () => {
-      if (cancelled) return;
-      const line = LOAD_LINES[lineIdx];
-      if (charIdx < line.length) {
-        charIdx++;
-        setCurrentText(line.slice(0, charIdx));
-        timer = setTimeout(typeChar, 22);
-      } else {
-        const done = line;
-        setCompletedLines(prev => [...prev, done]);
-        setCurrentText("");
-        lineIdx++;
-        charIdx = 0;
-        if (lineIdx < LOAD_LINES.length) {
-          timer = setTimeout(typeChar, 180);
-        } else {
-          timer = setTimeout(startProgress, 220);
-        }
-      }
-    };
-
-    const startProgress = () => {
-      if (cancelled) return;
-      setPhase("progress");
-      let p = 0;
-      interval = setInterval(() => {
-        if (cancelled) { clearInterval(interval); return; }
-        p += 1.4;
-        const capped = Math.min(p, 100);
-        setProgress(capped);
-        if (capped >= 100) {
-          clearInterval(interval);
-          timer = setTimeout(() => {
-            if (cancelled) return;
-            setPhase("fadeout");
-            timer = setTimeout(onDone, 500);
-          }, 280);
-        }
-      }, 10);
-    };
-
-    timer = setTimeout(typeChar, 250);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+// ─── Section header (AstroWind Headline pattern) ──────────────────────────────
+function SectionHeader({
+  tagline, title, subtitle,
+}: { tagline: string; title: string; subtitle?: string }) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: BG,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: "0 24px",
-        opacity: phase === "fadeout" ? 0 : 1,
-        transition: "opacity 0.5s ease",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 520 }}>
-        {/* Window chrome */}
-        <div
-          style={{
-            background: CARD,
-            border: `1px solid ${BORDER}`,
-            borderRadius: "10px 10px 0 0",
-            padding: "10px 16px",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
-          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
-          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
-          <span style={{ marginLeft: 8, fontSize: 13, color: FAINT, fontFamily: MONO }}>
-            alex@portfolio:~
-          </span>
-        </div>
-
-        {/* Terminal body */}
-        <div
-          style={{
-            background: "#090d12",
-            border: `1px solid ${BORDER}`,
-            borderTop: "none",
-            borderRadius: "0 0 10px 10px",
-            padding: "20px 22px",
-            minHeight: 168,
-            fontFamily: MONO,
-            fontSize: 14,
-          }}
-        >
-          {completedLines.map((line, i) => (
-            <div key={i} style={{ marginBottom: 8, display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ color: CYAN, flexShrink: 0 }}>$</span>
-              <span style={{ color: TEXT, flex: 1 }}>{line}</span>
-              <span style={{ color: "#22c55e", fontSize: 13, flexShrink: 0 }}>✓</span>
-            </div>
-          ))}
-
-          {phase === "typing" && (
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ color: CYAN, flexShrink: 0 }}>$</span>
-              <span style={{ color: WHITE }}>
-                {currentText}
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 7,
-                    height: "1em",
-                    background: CYAN,
-                    marginLeft: 2,
-                    verticalAlign: "text-bottom",
-                    animation: "termCursor 1s step-end infinite",
-                  }}
-                />
-              </span>
-            </div>
-          )}
-
-          {(phase === "progress" || phase === "fadeout") && (
-            <div style={{ marginTop: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ color: CYAN, fontSize: 13 }}>$ npm run deploy --prod</span>
-                <span style={{ color: DIM, fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
-                  {Math.floor(progress)}%
-                </span>
-              </div>
-              <div style={{ background: "#1c2128", borderRadius: 4, height: 4, overflow: "hidden" }}>
-                <div
-                  style={{
-                    height: "100%",
-                    width: `${progress}%`,
-                    background: `linear-gradient(90deg, ${CYAN}, #0080cc)`,
-                    borderRadius: 4,
-                    transition: "width 0.04s linear",
-                    boxShadow: `0 0 10px ${CYAN}55`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+    <div style={{ textAlign: "center", maxWidth: 680, margin: "0 auto 64px", padding: "0 16px" }}>
+      <p style={{
+        color: C.blue200, fontWeight: 700, letterSpacing: "0.1em",
+        textTransform: "uppercase", fontSize: 13, marginBottom: 14, marginTop: 0,
+      }}>
+        {tagline}
+      </p>
+      <h2 style={{
+        fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 800, color: C.heading,
+        margin: "0 0 16px", letterSpacing: -0.5, lineHeight: 1.2,
+      }}>
+        {title}
+      </h2>
+      {subtitle && (
+        <p style={{ fontSize: 17, color: C.muted, margin: 0, lineHeight: 1.75 }}>{subtitle}</p>
+      )}
     </div>
   );
 }
 
-// ── Section header ────────────────────────────────────────────────────────────
-function SectionHeader({ label }: { label: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
-      <span style={{ whiteSpace: "nowrap" as const, fontFamily: MONO, letterSpacing: "1.5px" }}>
-        <span style={{ color: CYAN, fontSize: 13, fontWeight: 600 }}>{"// "}</span>
-        <span style={{ color: WHITE, fontSize: 13, fontWeight: 700 }}>{label.toUpperCase()}</span>
-      </span>
-      <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${CYAN}55, transparent)` }} />
-    </div>
-  );
-}
-
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function Home() {
-  const [loaded, setLoaded]               = useState(false);
-  const [activeSection, setActiveSection] = useState("about");
-  const [typedName, setTypedName]         = useState("");
-  const [showCursor, setShowCursor]       = useState(true);
+  const [loaded, setLoaded]           = useState(false);
+  const [progress, setProgress]       = useState(0);
+  const [lineIndex, setLineIndex]     = useState(0);
+  const [displayedLine, setDisplayedLine] = useState("");
+  const [activeSection, setActiveSection] = useState("home");
 
-  // Active section on scroll
+  // Loading screen typewriter
+  useEffect(() => {
+    let charIndex = 0;
+    let currentLine = 0;
+
+    const typeNextLine = () => {
+      if (currentLine >= LOADING_LINES.length) {
+        setTimeout(() => setLoaded(true), 400);
+        return;
+      }
+      const line = LOADING_LINES[currentLine];
+      charIndex = 0;
+      setLineIndex(currentLine);
+      setDisplayedLine("");
+      const iv = setInterval(() => {
+        charIndex++;
+        setDisplayedLine(line.slice(0, charIndex));
+        if (charIndex >= line.length) {
+          clearInterval(iv);
+          setProgress(Math.round(((currentLine + 1) / LOADING_LINES.length) * 100));
+          currentLine++;
+          setTimeout(typeNextLine, 300);
+        }
+      }, 28);
+    };
+    typeNextLine();
+  }, []);
+
+  // Active section tracking
   useEffect(() => {
     if (!loaded) return;
-    const sections = ["about", "skills", "projects", "experience", "certifications", "contact"];
+    const sections = ["home","about","skills","projects","experience","certifications","contact"];
     const handleScroll = () => {
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id);
-        if (el && window.scrollY >= el.offsetTop - 120) {
-          setActiveSection(id);
-          break;
-        }
+        if (el && window.scrollY >= el.offsetTop - 140) { setActiveSection(id); break; }
       }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loaded]);
 
-  // Hero typewriter
-  useEffect(() => {
-    if (!loaded) return;
-    const name = content.name;
-    let i = 0;
-    setTypedName("");
-    const timer = setInterval(() => {
-      i++;
-      setTypedName(name.slice(0, i));
-      if (i >= name.length) {
-        clearInterval(timer);
-        setShowCursor(true);
-      }
-    }, 65);
-    return () => clearInterval(timer);
-  }, [loaded]);
+  const navItems = [
+    { id: "home",           label: "Home" },
+    { id: "about",          label: "About" },
+    { id: "skills",         label: "Skills" },
+    { id: "projects",       label: "Projects" },
+    { id: "experience",     label: "Experience" },
+    { id: "certifications", label: "Certs" },
+    { id: "contact",        label: "Contact" },
+  ];
 
-  // Scroll-based fade-in via IntersectionObserver
-  useEffect(() => {
-    if (!loaded) return;
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            el.style.opacity = "1";
-            el.style.transform = "translateY(0)";
-          }
-        });
-      },
-      { threshold: 0.07 }
+  // ── Loading screen ──────────────────────────────────────────────────────────
+  if (!loaded) {
+    return (
+      <div style={{
+        background: C.bg, minHeight: "100vh",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "ui-monospace, 'Cascadia Code', 'Fira Code', monospace",
+      }}>
+        <div style={{ width: "min(460px, 88vw)" }}>
+          <p style={{ color: C.blue200, fontSize: 11, letterSpacing: 3, textTransform: "uppercase", marginBottom: 28, marginTop: 0 }}>
+            Initializing
+          </p>
+          <div style={{ marginBottom: 28, minHeight: 110 }}>
+            {LOADING_LINES.slice(0, lineIndex).map((line, i) => (
+              <div key={i} style={{ color: "#86efac", fontSize: 13, marginBottom: 8, display: "flex", gap: 10 }}>
+                <span style={{ color: "#4ade80" }}>✓</span>{line}
+              </div>
+            ))}
+            {lineIndex < LOADING_LINES.length && (
+              <div style={{ color: C.text, fontSize: 13, display: "flex", gap: 10 }}>
+                <span style={{ color: C.primary }}>▶</span>
+                <span>{displayedLine}<span style={{ animation: "blink 1s infinite", color: C.primary }}>|</span></span>
+              </div>
+            )}
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 9999, height: 4, overflow: "hidden", marginBottom: 10 }}>
+            <div style={{
+              background: `linear-gradient(90deg, ${C.primary}, #6d28d9)`,
+              height: "100%", width: `${progress}%`,
+              transition: "width 0.5s ease", borderRadius: 9999,
+            }} />
+          </div>
+          <p style={{ color: C.muted, fontSize: 12, margin: 0 }}>{progress}%</p>
+        </div>
+        <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
+      </div>
     );
-    document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, [loaded]);
+  }
 
-  const projects   = content.projects as ProjectItem[];
-  const experience = content.experience as ExperienceItem[];
-
-  const tagPill = (color: string, bg: string, border: string): React.CSSProperties => ({
-    fontSize: 13,
-    color,
-    background: bg,
-    border: `1px solid ${border}`,
-    borderRadius: 4,
-    padding: "2px 8px",
-    fontWeight: 500,
-    fontFamily: MONO,
-    whiteSpace: "nowrap" as const,
-  });
-
-  const divider = <div style={{ borderTop: `1px solid ${BORDER}` }} />;
-
+  // ── Main page ───────────────────────────────────────────────────────────────
   return (
-    <>
+    <div style={{
+      background: C.bg, color: C.text, minHeight: "100vh",
+      fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+    }}>
       <style>{`
-        @keyframes termCursor { 0%,49% { opacity:1; } 50%,100% { opacity:0; } }
-
-        .fade-in {
-          opacity: 0;
-          transform: translateY(28px);
-          transition: opacity 0.65s ease, transform 0.65s ease;
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .nav-link:hover { color: ${C.text} !important; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.06) !important; border-color: rgba(229,236,246,0.45) !important; }
+        .card-hover:hover { border-color: ${C.borderHover} !important; box-shadow: 0 8px 40px rgba(1,97,239,0.1) !important; }
+        .card-lift:hover { border-color: ${C.borderHover} !important; transform: translateY(-3px) !important; box-shadow: 0 12px 48px rgba(1,97,239,0.12) !important; }
+        .project-link:hover { background: rgba(191,219,254,0.08) !important; border-color: rgba(191,219,254,0.5) !important; }
+        @media (max-width: 768px) {
+          .about-grid { grid-template-columns: 1fr !important; }
+          .nav-full { display: none !important; }
+          .hero-pad { padding: 120px 20px 80px !important; }
+          .section-pad { padding: 60px 20px 72px !important; }
         }
-
-        /* Project cards */
-        .p-card {
-          border: 1px solid ${BORDER};
-          border-radius: 12px;
-          padding: 24px;
-          background: ${CARD};
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .p-card:hover {
-          border-color: rgba(0,191,255,0.45);
-          box-shadow: 0 0 0 1px rgba(0,191,255,0.08),
-                      0 8px 32px rgba(0,191,255,0.1);
-        }
-
-        /* Skill cards */
-        .s-card {
-          border: 1px solid ${BORDER};
-          border-radius: 12px;
-          padding: 20px 22px;
-          background: ${CARD};
-        }
-
-        /* Experience cards */
-        .e-card {
-          border: 1px solid ${BORDER};
-          border-radius: 12px;
-          padding: 24px;
-          background: ${CARD};
-        }
-
-        /* Cert cards */
-        .c-card {
-          border: 1px solid ${BORDER};
-          border-radius: 10px;
-          padding: 16px 18px;
-          background: ${CARD};
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          transition: border-color 0.2s;
-        }
-        .c-card:hover { border-color: rgba(0,191,255,0.4); }
-
-        /* Nav links */
-        .nav-a {
-          text-decoration: none;
-          padding: 5px 9px;
-          border-radius: 6px;
-          font-size: 14px;
-          transition: color 0.15s, background 0.15s;
-        }
-        .nav-a:hover {
-          color: ${WHITE} !important;
-          background: rgba(0,191,255,0.08) !important;
-        }
-
-        /* Project links */
-        .proj-a {
-          font-size: 14px;
-          font-weight: 500;
-          text-decoration: none;
-          color: ${DIM};
-          transition: color 0.15s;
-          white-space: nowrap;
-        }
-        .proj-a:hover { color: ${CYAN} !important; }
-
-        /* Primary button — outline style, fills on hover */
-        .btn-cyan {
-          transition: background 0.18s, color 0.18s, border-color 0.18s;
-        }
-        .btn-cyan:hover {
-          background: ${CYAN} !important;
-          color: #000 !important;
-          border-color: ${CYAN} !important;
-        }
-
-        /* Ghost / secondary button */
-        .btn-ghost {
-          transition: background 0.15s, border-color 0.15s;
-        }
-        .btn-ghost:hover {
-          background: rgba(0,191,255,0.06) !important;
-          border-color: ${BORDER} !important;
-        }
-
-        /* Contact / CTA rows */
-        .contact-row {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          padding: 13px 22px;
-          border-radius: 8px;
-          font-size: 15px;
-          font-weight: 500;
-          text-decoration: none;
-          transition: background 0.15s, border-color 0.15s;
-        }
-
-        @media (max-width: 600px) {
-          .nav-a    { padding: 4px 6px !important; font-size: 12px !important; }
-          .hero-h1  { font-size: 38px !important; letter-spacing: -1.2px !important; }
-          .skills-g { grid-template-columns: 1fr !important; }
-          .certs-g  { grid-template-columns: 1fr !important; }
-          .hero-cta { flex-direction: column; }
-          .hero-cta a { justify-content: center; }
+        @media (max-width: 900px) {
+          .nav-label { display: none; }
         }
       `}</style>
 
-      {!loaded && <LoadingScreen onDone={() => setLoaded(true)} />}
+      {/* ── Navigation ──────────────────────────────────────────────────────── */}
+      <nav style={{
+        position: "fixed", top: 0, width: "100%", zIndex: 100,
+        background: C.nav, borderBottom: "1px solid rgba(255,255,255,0.07)",
+        backdropFilter: "blur(14px)",
+      }}>
+        <div style={{
+          maxWidth: 1280, margin: "0 auto", padding: "0 24px",
+          display: "flex", justifyContent: "space-between", alignItems: "center", height: 64,
+        }}>
+          <a href="#home" style={{ color: C.heading, fontWeight: 700, fontSize: 16, textDecoration: "none", letterSpacing: -0.3 }}>
+            {content.name}
+          </a>
+          <div className="nav-full" style={{ display: "flex", gap: 2 }}>
+            {navItems.map(item => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className="nav-link"
+                style={{
+                  fontSize: 14, padding: "6px 14px",
+                  color: activeSection === item.id ? "#fff" : C.muted,
+                  textDecoration: "none", borderRadius: 9999,
+                  background: activeSection === item.id ? C.primary : "transparent",
+                  fontWeight: activeSection === item.id ? 600 : 400,
+                  transition: "all 0.2s",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </nav>
 
-      {loaded && (
-        <main
-          style={{
-            fontFamily: FONT,
-            background: BG,
-            color: TEXT,
-            minHeight: "100vh",
-            fontSize: 15,
-            lineHeight: 1.8,
-          }}
+      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      <section id="home" style={{ position: "relative", overflow: "hidden" }}>
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(1,97,239,0.18) 0%, transparent 60%)",
+        }} />
+        <div
+          className="hero-pad"
+          style={{ maxWidth: 1280, margin: "0 auto", padding: "168px 24px 128px", textAlign: "center", position: "relative" }}
         >
-          {/* ── Nav ───────────────────────────────────────────── */}
-          <nav
-            style={{
-              position: "fixed",
-              top: 0,
-              width: "100%",
-              zIndex: 50,
-              background: "rgba(13,17,23,0.9)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-              borderBottom: `1px solid ${BORDER}`,
-            }}
-          >
+          <FadeIn>
+            <p style={{
+              color: C.blue200, fontWeight: 700, letterSpacing: "0.1em",
+              textTransform: "uppercase", fontSize: 13, marginBottom: 20, marginTop: 0,
+            }}>
+              {content.title}
+            </p>
+            <h1 style={{
+              fontSize: "clamp(44px, 8vw, 88px)", fontWeight: 800, color: C.heading,
+              margin: "0 0 24px", lineHeight: 1.05, letterSpacing: -2,
+            }}>
+              {content.name}
+            </h1>
+            <p style={{
+              fontSize: "clamp(16px, 2vw, 19px)", color: C.muted,
+              maxWidth: 580, margin: "0 auto 44px", lineHeight: 1.8,
+            }}>
+              {content.about}
+            </p>
+            <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+              <a
+                href="#experience"
+                style={{
+                  padding: "13px 32px", background: C.primary, color: "#fff",
+                  fontWeight: 600, fontSize: 15, textDecoration: "none",
+                  borderRadius: 9999, border: `1px solid ${C.primary}`, transition: "background 0.2s",
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.primaryHov}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = C.primary}
+              >
+                View Experience
+              </a>
+              <a
+                href={content.contact.github}
+                target="_blank" rel="noopener noreferrer"
+                className="btn-ghost"
+                style={{
+                  padding: "13px 32px", background: "transparent", color: C.text,
+                  fontWeight: 600, fontSize: 15, textDecoration: "none",
+                  borderRadius: 9999, border: "1px solid rgba(229,236,246,0.22)", transition: "all 0.2s",
+                }}
+              >
+                GitHub Profile ↗
+              </a>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ── About ───────────────────────────────────────────────────────────── */}
+      <section id="about" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="section-pad" style={{ maxWidth: 1280, margin: "0 auto", padding: "88px 24px 96px" }}>
+          <FadeIn>
+            <SectionHeader tagline="Who I am" title="About Me" />
             <div
-              style={{
-                maxWidth: 800,
-                margin: "0 auto",
-                padding: "0 20px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                height: 52,
-              }}
+              className="about-grid"
+              style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start", maxWidth: 960, margin: "0 auto" }}
             >
-              <span style={{ fontSize: 14, fontWeight: 600, color: WHITE, fontFamily: MONO }}>
-                {content.name}{" "}
-                <span style={{ color: CYAN }}>~</span>
-              </span>
-              <div style={{ display: "flex", gap: 2 }}>
-                {(
-                  [
-                    ["about",          "About"],
-                    ["skills",         "Skills"],
-                    ["projects",       "Projects"],
-                    ["experience",     "Experience"],
-                    ["certifications", "Certs"],
-                    ["contact",        "Contact"],
-                  ] as [string, string][]
-                ).map(([id, label]) => (
-                  <a
-                    key={id}
-                    href={`#${id}`}
-                    className="nav-a"
+              <div>
+                <p style={{ fontSize: 16, color: C.text, lineHeight: 1.9, marginBottom: 20, marginTop: 0 }}>{content.about}</p>
+                <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.9, margin: 0 }}>
+                  Based in {content.location}. Focused on automation, cloud infrastructure, and making deployments fast and reliable.
+                </p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                {[
+                  { label: "Projects",       value: `${content.projects.length}+` },
+                  { label: "Certifications", value: `${certifications.length}` },
+                  { label: "Cloud",          value: "AWS" },
+                  { label: "Orchestration",  value: "K8s" },
+                ].map(stat => (
+                  <div
+                    key={stat.label}
+                    className="card-hover"
                     style={{
-                      color: activeSection === id ? CYAN : DIM,
-                      fontWeight: activeSection === id ? 500 : 400,
-                      background:
-                        activeSection === id
-                          ? "rgba(0,191,255,0.08)"
-                          : "transparent",
+                      background: C.card, border: `1px solid ${C.border}`,
+                      borderRadius: 8, padding: "24px 16px", textAlign: "center",
+                      backdropFilter: "blur(8px)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
+                      transition: "border-color 0.2s, box-shadow 0.2s",
                     }}
                   >
-                    {label}
-                  </a>
+                    <div style={{ fontSize: 30, fontWeight: 800, color: C.primary, marginBottom: 6 }}>{stat.value}</div>
+                    <div style={{ fontSize: 13, color: C.muted }}>{stat.label}</div>
+                  </div>
                 ))}
               </div>
             </div>
-          </nav>
+          </FadeIn>
+        </div>
+      </section>
 
-          <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px" }}>
-
-            {/* ── Hero ──────────────────────────────────────────── */}
-            <section id="about" style={{ paddingTop: 120, paddingBottom: 88 }}>
-              {/* Status badge */}
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  border: "1px solid rgba(0,191,255,0.22)",
-                  background: "rgba(0,191,255,0.05)",
-                  borderRadius: 20,
-                  padding: "4px 14px",
-                  marginBottom: 28,
-                }}
-              >
-                <span
-                  style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    background: "#22c55e",
-                    display: "inline-block",
-                    boxShadow: "0 0 6px #22c55e88",
-                  }}
-                />
-                <span style={{ fontSize: 13, color: "#4ade80", fontWeight: 500, fontFamily: MONO }}>
-                  open to new roles
-                </span>
-              </div>
-
-              <h1
-                className="hero-h1"
-                style={{
-                  fontSize: 56,
-                  fontWeight: 800,
-                  color: WHITE,
-                  margin: "0 0 12px",
-                  letterSpacing: "-2.5px",
-                  lineHeight: 1.1,
-                  minHeight: "1.1em",
-                }}
-              >
-                {typedName}
-                {showCursor && (
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: 3,
-                      height: "0.75em",
-                      background: CYAN,
-                      marginLeft: 5,
-                      verticalAlign: "baseline",
-                      borderRadius: 1,
-                      animation: "termCursor 1s step-end infinite",
-                    }}
-                  />
-                )}
-              </h1>
-
-              <p style={{ fontSize: 18, color: DIM, margin: "0 0 22px", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
-                {content.title}
-              </p>
-              <p style={{ fontSize: 15, color: TEXT, margin: 0, lineHeight: 1.8, maxWidth: 580 }}>
-                {content.about}
-              </p>
-
-              <div
-                className="hero-cta"
-                style={{ display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 36 }}
-              >
-                {/* Primary — cyan outline, fills on hover */}
-                <a
-                  href="#projects"
-                  className="btn-cyan contact-row"
-                  style={{
-                    background: "transparent",
-                    color: CYAN,
-                    border: `1px solid ${CYAN}`,
-                    fontWeight: 700,
-                  }}
-                >
-                  View Projects
-                </a>
-                <a
-                  href="#contact"
-                  className="btn-ghost contact-row"
-                  style={{
-                    background: "transparent",
-                    color: WHITE,
-                    border: `1px solid ${BORDER}`,
-                  }}
-                >
-                  Get in touch
-                </a>
-              </div>
-            </section>
-
-            {divider}
-
-            {/* ── Skills ────────────────────────────────────────── */}
-            <section id="skills" style={{ paddingTop: 64, paddingBottom: 72 }}>
-              <div className="fade-in">
-                <SectionHeader label="Skills" />
+      {/* ── Skills ──────────────────────────────────────────────────────────── */}
+      <section id="skills" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+        <div className="section-pad" style={{ maxWidth: 1280, margin: "0 auto", padding: "88px 24px 96px" }}>
+          <FadeIn>
+            <SectionHeader
+              tagline="What I work with"
+              title="Technical Expertise"
+              subtitle="Deep hands-on experience across modern cloud and DevOps tooling"
+            />
+          </FadeIn>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
+            {skillCategories.map((cat, i) => (
+              <FadeIn key={cat.name} delay={i * 60}>
                 <div
-                  className="skills-g"
+                  className="card-hover"
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                    gap: 12,
-                    marginTop: 28,
+                    background: C.card, border: `1px solid ${C.border}`,
+                    borderRadius: 8, padding: 24, height: "100%",
+                    backdropFilter: "blur(8px)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
                   }}
                 >
-                  {content.skillCategories.map(cat => (
-                    <div key={cat.name} className="s-card">
-                      <p
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: C.heading, marginBottom: 16, marginTop: 0, letterSpacing: "0.01em" }}>
+                    {cat.name}
+                  </h3>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {cat.subskills.map(s => (
+                      <span
+                        key={s}
                         style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: CYAN,
-                          margin: "0 0 12px",
-                          fontFamily: MONO,
-                          letterSpacing: "0.5px",
+                          fontSize: 12, padding: "4px 12px",
+                          background: C.tagBg, color: C.blue200,
+                          border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
                         }}
                       >
-                        {cat.name}
-                      </p>
-                      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                        {cat.subskills.map(s => (
-                          <span
-                            key={s}
-                            style={{
-                              fontSize: 13,
-                              color: CYAN,
-                              background: TAG_BG,
-                              border: `1px solid ${TAG_BRD}`,
-                              borderRadius: 4,
-                              padding: "3px 9px",
-                            }}
-                          >
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                        {s}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {divider}
-
-            {/* ── Projects ──────────────────────────────────────── */}
-            <section id="projects" style={{ paddingTop: 64, paddingBottom: 72 }}>
-              <div className="fade-in">
-                <SectionHeader label="Projects" />
+      {/* ── Projects ────────────────────────────────────────────────────────── */}
+      <section id="projects" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="section-pad" style={{ maxWidth: 1280, margin: "0 auto", padding: "88px 24px 96px" }}>
+          <FadeIn>
+            <SectionHeader
+              tagline="What I've built"
+              title="Projects"
+              subtitle="Real infrastructure powering production workloads"
+            />
+          </FadeIn>
+          <div style={{ display: "grid", gap: 20 }}>
+            {(content.projects as Array<typeof content.projects[0] & { infra?: string }>).map((project, i) => (
+              <FadeIn key={project.title} delay={i * 70}>
                 <div
+                  className="card-lift"
                   style={{
-                    display: "flex",
-                    flexDirection: "column" as const,
-                    gap: 12,
-                    marginTop: 28,
+                    background: C.card, border: `1px solid ${C.border}`,
+                    borderRadius: 8, padding: "28px 32px",
+                    backdropFilter: "blur(8px)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
+                    transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
                   }}
                 >
-                  {projects.map(project => (
-                    <div key={project.title} className="p-card">
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          gap: 16,
-                          marginBottom: 12,
-                        }}
-                      >
-                        <h3
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
+                    <h3 style={{ fontSize: 17, fontWeight: 700, color: C.heading, margin: 0 }}>{project.title}</h3>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {project.github && (
+                        <a
+                          href={project.github} target="_blank" rel="noopener noreferrer"
+                          className="project-link"
                           style={{
-                            fontSize: 17,
-                            fontWeight: 600,
-                            color: WHITE,
-                            margin: 0,
-                            lineHeight: 1.2,
+                            fontSize: 13, color: C.blue200, textDecoration: "none",
+                            border: "1px solid rgba(191,219,254,0.22)", padding: "5px 14px",
+                            borderRadius: 9999, transition: "all 0.2s",
                           }}
                         >
-                          {project.title}
-                        </h3>
-                        <div style={{ display: "flex", gap: 14, flexShrink: 0, paddingTop: 2 }}>
-                          {project.github && (
-                            <a
-                              href={project.github}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="proj-a"
-                            >
-                              Code ↗
-                            </a>
-                          )}
-                          {project.infra && (
-                            <a
-                              href={project.infra}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="proj-a"
-                            >
-                              Infra ↗
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                      <p
-                        style={{
-                          fontSize: 15,
-                          color: TEXT,
-                          margin: "0 0 16px",
-                          lineHeight: 1.8,
-                        }}
-                      >
-                        {project.description}
-                      </p>
-                      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                        {project.tags.map(tag => (
-                          <span key={tag} style={tagPill(CYAN, TAG_BG, TAG_BRD)}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {divider}
-
-            {/* ── Experience ────────────────────────────────────── */}
-            <section id="experience" style={{ paddingTop: 64, paddingBottom: 72 }}>
-              <div className="fade-in">
-                <SectionHeader label="Experience" />
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column" as const,
-                    gap: 14,
-                    marginTop: 28,
-                  }}
-                >
-                  {experience.map(job => (
-                    <div key={job.company} className="e-card">
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          flexWrap: "wrap" as const,
-                          gap: 8,
-                          marginBottom: 14,
-                        }}
-                      >
-                        <div>
-                          <h3
-                            style={{
-                              fontSize: 17,
-                              fontWeight: 600,
-                              color: WHITE,
-                              margin: 0,
-                              lineHeight: 1.2,
-                            }}
-                          >
-                            {job.role}
-                          </h3>
-                          <p style={{ fontSize: 15, color: DIM, margin: "4px 0 0" }}>
-                            {job.company}
-                          </p>
-                        </div>
-                        <span
+                          GitHub ↗
+                        </a>
+                      )}
+                      {project.infra && (
+                        <a
+                          href={project.infra} target="_blank" rel="noopener noreferrer"
+                          className="project-link"
                           style={{
-                            fontSize: 13,
-                            color: DIM,
-                            fontFamily: MONO,
-                            border: `1px solid ${BORDER}`,
-                            borderRadius: 4,
-                            padding: "3px 9px",
-                            flexShrink: 0,
+                            fontSize: 13, color: C.blue200, textDecoration: "none",
+                            border: "1px solid rgba(191,219,254,0.22)", padding: "5px 14px",
+                            borderRadius: 9999, transition: "all 0.2s",
                           }}
                         >
-                          {job.period}
-                        </span>
-                      </div>
-
-                      <ul
-                        style={{
-                          margin: 0,
-                          padding: 0,
-                          listStyle: "none",
-                          display: "flex",
-                          flexDirection: "column" as const,
-                          gap: 7,
-                        }}
-                      >
-                        {job.points.map(point => (
-                          <li
-                            key={point}
-                            style={{
-                              fontSize: 15,
-                              color: TEXT,
-                              lineHeight: 1.8,
-                              display: "flex",
-                              gap: 10,
-                              alignItems: "flex-start",
-                            }}
-                          >
-                            <span
-                              style={{
-                                color: CYAN,
-                                flexShrink: 0,
-                                marginTop: "0.35em",
-                                fontSize: 9,
-                              }}
-                            >
-                              ▸
-                            </span>
-                            {point}
-                          </li>
-                        ))}
-                      </ul>
-
-                      {job.tags && job.tags.length > 0 && (
-                        <div
-                          style={{
-                            display: "flex",
-                            flexWrap: "wrap" as const,
-                            gap: 6,
-                            marginTop: 16,
-                            paddingTop: 16,
-                            borderTop: `1px solid ${BORDER}`,
-                          }}
-                        >
-                          {job.tags.map(tag => (
-                            <span key={tag} style={tagPill(DIM, CARD, BORDER)}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                          Infra ↗
+                        </a>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {divider}
-
-            {/* ── Certifications ────────────────────────────────── */}
-            <section id="certifications" style={{ paddingTop: 64, paddingBottom: 72 }}>
-              <div className="fade-in">
-                <SectionHeader label="Certifications" />
-                <div
-                  className="certs-g"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                    gap: 10,
-                    marginTop: 28,
-                  }}
-                >
-                  {content.certifications.map(cert => (
-                    <div key={cert} className="c-card">
-                      <div
+                  </div>
+                  <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.85, margin: "0 0 18px" }}>{project.description}</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {project.tags.map(tag => (
+                      <span
+                        key={tag}
                         style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 8,
-                          background: TAG_BG,
-                          border: `1px solid ${TAG_BRD}`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                          fontSize: 15,
-                          color: CYAN,
+                          fontSize: 12, padding: "3px 12px",
+                          background: C.tagBg, color: C.blue200,
+                          border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
                         }}
                       >
-                        ✓
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <p
-                          style={{
-                            fontSize: 15,
-                            fontWeight: 500,
-                            color: WHITE,
-                            margin: 0,
-                            lineHeight: 1.3,
-                          }}
-                        >
-                          {cert}
-                        </p>
-                        <p
-                          style={{
-                            fontSize: 13,
-                            color: DIM,
-                            margin: "3px 0 0",
-                            fontFamily: MONO,
-                          }}
-                        >
-                          {CERT_ISSUERS[cert] ?? ""}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {divider}
-
-            {/* ── Contact ───────────────────────────────────────── */}
-            <section id="contact" style={{ paddingTop: 64, paddingBottom: 120 }}>
-              <div className="fade-in">
-                <SectionHeader label="Contact" />
-                <p
+      {/* ── Experience ──────────────────────────────────────────────────────── */}
+      <section id="experience" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+        <div className="section-pad" style={{ maxWidth: 1280, margin: "0 auto", padding: "88px 24px 96px" }}>
+          <FadeIn>
+            <SectionHeader tagline="Where I've worked" title="Work Experience" />
+          </FadeIn>
+          <div style={{ maxWidth: 860, margin: "0 auto", display: "grid", gap: 24 }}>
+            {(content.experience as Array<typeof content.experience[0] & { tags?: string[] }>).map((job, i) => (
+              <FadeIn key={job.company} delay={i * 80}>
+                <div
+                  className="card-hover"
                   style={{
-                    fontSize: 15,
-                    color: TEXT,
-                    lineHeight: 1.8,
-                    margin: "20px 0 32px",
-                    maxWidth: 500,
+                    background: C.card, border: `1px solid ${C.border}`,
+                    borderRadius: 8, padding: "28px 32px",
+                    backdropFilter: "blur(8px)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
                   }}
                 >
-                  Open to new DevOps / Cloud Engineering roles. I respond quickly — feel free to reach out through any of the channels below.
-                </p>
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" as const }}>
-                  <a
-                    href={`mailto:${content.contact.email}`}
-                    className="btn-cyan contact-row"
-                    style={{
-                      background: "transparent",
-                      color: CYAN,
-                      border: `1px solid ${CYAN}`,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {content.contact.email}
-                  </a>
-                  <a
-                    href={content.contact.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-ghost contact-row"
-                    style={{
-                      background: "transparent",
-                      color: WHITE,
-                      border: `1px solid ${BORDER}`,
-                    }}
-                  >
-                    GitHub ↗
-                  </a>
-                  <a
-                    href={content.contact.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-ghost contact-row"
-                    style={{
-                      background: "transparent",
-                      color: WHITE,
-                      border: `1px solid ${BORDER}`,
-                    }}
-                  >
-                    LinkedIn ↗
-                  </a>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4, flexWrap: "wrap", gap: 8 }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 700, color: C.heading, margin: 0 }}>{job.role}</h3>
+                    <span style={{
+                      fontSize: 13, color: C.blue200, background: C.tagBg,
+                      padding: "4px 14px", borderRadius: 9999, border: `1px solid ${C.tagBorder}`,
+                    }}>
+                      {job.period}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 14, color: C.primary, marginBottom: 18, marginTop: 4, fontWeight: 500 }}>{job.company}</p>
+                  <ul style={{ margin: "0 0 18px", padding: 0, listStyle: "none" }}>
+                    {job.points.map(point => (
+                      <li
+                        key={point}
+                        style={{ fontSize: 14, color: C.text, lineHeight: 1.85, paddingLeft: 20, position: "relative", marginBottom: 8 }}
+                      >
+                        <span style={{ position: "absolute", left: 0, color: C.primary, fontSize: 10, top: 6 }}>◆</span>
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                  {job.tags && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {job.tags.map(tag => (
+                        <span
+                          key={tag}
+                          style={{
+                            fontSize: 12, padding: "3px 12px",
+                            background: C.tagBg, color: C.blue200,
+                            border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </section>
+              </FadeIn>
+            ))}
           </div>
+        </div>
+      </section>
 
-          {/* ── Footer ────────────────────────────────────────── */}
-          <footer
-            style={{
-              borderTop: `1px solid ${BORDER}`,
-              padding: "20px 24px",
-              textAlign: "center" as const,
-            }}
-          >
-            <p style={{ fontSize: 13, color: FAINT, margin: 0, fontFamily: MONO }}>
-              Built with Next.js · Deployed on AWS S3 + CloudFront
-            </p>
-          </footer>
-        </main>
-      )}
-    </>
+      {/* ── Certifications ──────────────────────────────────────────────────── */}
+      <section id="certifications" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="section-pad" style={{ maxWidth: 1280, margin: "0 auto", padding: "88px 24px 96px" }}>
+          <FadeIn>
+            <SectionHeader
+              tagline="Credentials"
+              title="Certifications"
+              subtitle="Industry-recognized certifications across cloud, DevOps, and infrastructure"
+            />
+          </FadeIn>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+            {certifications.map((cert, i) => (
+              <FadeIn key={cert.name} delay={i * 50}>
+                <div
+                  className="card-hover"
+                  style={{
+                    background: C.card, border: `1px solid ${C.border}`,
+                    borderRadius: 8, padding: 20,
+                    display: "flex", alignItems: "flex-start", gap: 16,
+                    backdropFilter: "blur(8px)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
+                  }}
+                >
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 8,
+                    background: C.tagBg, border: `1px solid ${C.tagBorder}`,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    <span style={{ color: C.primary, fontSize: 18, fontWeight: 700 }}>✓</span>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: C.heading, marginBottom: 4, marginTop: 0 }}>{cert.name}</p>
+                    <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>{cert.issuer}</p>
+                    <span style={{
+                      fontSize: 11, color: C.blue200, marginTop: 8,
+                      background: C.tagBg, display: "inline-block",
+                      padding: "2px 10px", borderRadius: 9999, border: `1px solid ${C.tagBorder}`,
+                    }}>
+                      Verified
+                    </span>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Contact ─────────────────────────────────────────────────────────── */}
+      <section id="contact" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+        <div className="section-pad" style={{ maxWidth: 1280, margin: "0 auto", padding: "88px 24px 128px", textAlign: "center" }}>
+          <FadeIn>
+            <SectionHeader
+              tagline="Let's connect"
+              title="Get in Touch"
+              subtitle="Open to new opportunities. Whether you have a role in mind or just want to talk infrastructure — reach out."
+            />
+            <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+              <a
+                href={`mailto:${content.contact.email}`}
+                style={{
+                  padding: "13px 32px", background: C.primary, color: "#fff",
+                  fontWeight: 600, fontSize: 15, textDecoration: "none",
+                  borderRadius: 9999, border: `1px solid ${C.primary}`, transition: "background 0.2s",
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.primaryHov}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = C.primary}
+              >
+                Email me
+              </a>
+              <a
+                href={content.contact.github}
+                target="_blank" rel="noopener noreferrer"
+                className="btn-ghost"
+                style={{
+                  padding: "13px 32px", background: "transparent", color: C.text,
+                  fontWeight: 600, fontSize: 15, textDecoration: "none",
+                  borderRadius: 9999, border: "1px solid rgba(229,236,246,0.22)", transition: "all 0.2s",
+                }}
+              >
+                GitHub
+              </a>
+              <a
+                href={content.contact.linkedin}
+                target="_blank" rel="noopener noreferrer"
+                className="btn-ghost"
+                style={{
+                  padding: "13px 32px", background: "transparent", color: C.text,
+                  fontWeight: 600, fontSize: 15, textDecoration: "none",
+                  borderRadius: 9999, border: "1px solid rgba(229,236,246,0.22)", transition: "all 0.2s",
+                }}
+              >
+                LinkedIn
+              </a>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ── Footer ──────────────────────────────────────────────────────────── */}
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "28px 24px", textAlign: "center" }}>
+        <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>
+          Built with Next.js · Deployed on AWS S3 + CloudFront · {content.name}
+        </p>
+      </footer>
+
+    </div>
   );
 }
