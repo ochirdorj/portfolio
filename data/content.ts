@@ -1,6 +1,6 @@
 export const content = {
   name: "Alex Dorj",
-  title: "DevOps / Cloud Engineer",
+  title: "DevOps / Cloud Engineer * AWS * Kubernetes",
   location: "Ulaanbaatar, Mongolia",
   about: "I am a DevOps and Cloud Engineer passionate about building reliable, automated infrastructure. I specialize in Kubernetes, AWS, and CI/CD pipelines. Currently looking for opportunities to help teams ship faster and more reliably.",
 
