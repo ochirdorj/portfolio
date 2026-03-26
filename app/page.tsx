@@ -4,7 +4,7 @@ import { content } from "@/data/content";
 import {
   SiKubernetes, SiHelm, SiArgo, SiDocker, SiTerraform,
   SiGithubactions, SiNodedotjs, SiPython, SiLinux, SiGit,
-  SiFastapi, SiGnubash,
+  SiFastapi, SiGnubash, SiHashicorp, SiLinuxprofessionalinstitute,
 } from "react-icons/si";
 import { FaAws } from "react-icons/fa";
 
@@ -114,6 +114,16 @@ const skillCategories = [
 ];
 
 // certifications now come from content.certifications
+
+const CERT_ICONS: Record<string, IconComponent> = {
+  "AWS Cloud Practitioner":        FaAws,
+  "AWS Solutions Architect":       FaAws,
+  "Kubernetes — KCNA":             SiKubernetes,
+  "HashiCorp Terraform Associate": SiHashicorp,
+  "GitHub Actions Certified":      SiGithubactions,
+  "Python — PCEP":                 SiPython,
+  "Linux Essentials Certificate":  SiLinuxprofessionalinstitute,
+};
 
 // ─── AstroWind-inspired dark color palette ────────────────────────────────────
 const C = {
@@ -640,11 +650,11 @@ export default function Home() {
                   }}
                 >
                   <div style={{
-                    width: 40, height: 40, borderRadius: 8,
+                    width: 44, height: 44, borderRadius: 10,
                     background: C.tagBg, border: `1px solid ${C.tagBorder}`,
                     display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                   }}>
-                    <span style={{ color: C.primary, fontSize: 18, fontWeight: 700 }}>✓</span>
+                    {(() => { const Icon = CERT_ICONS[cert.name]; return Icon ? <Icon size={22} color={C.blue200} /> : <span style={{ color: C.primary, fontSize: 18, fontWeight: 700 }}>✓</span>; })()}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 14, fontWeight: 600, color: C.heading, marginBottom: 4, marginTop: 0 }}>{cert.name}</p>
