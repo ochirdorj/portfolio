@@ -93,9 +93,11 @@ export const content = {
       role: "DevOps Engineer",
       period: "2022 — Present",
       points: [
-        "Migrated monolithic application to Kubernetes reducing deployment time by 70%",
-        "Built CI/CD pipelines using GitHub Actions for 5 development teams",
-        "Reduced AWS infrastructure costs by 40% through right-sizing and reserved instances"
+        "Built and managed secure, reliable AWS core infrastructures using Terraform and CloudFormation",
+        "Designed and managed multi-account and multi-region AWS environments through AWS Control tower and Organization",
+        "Created,  containerized docker image and deployed to Kubernetes",
+        "Built and optimized CI/CD pipelines for application deployment",
+        "Designed and implemented secure authentication between AWS infrastructure and other platforms"
       ],
       tags: ["Kubernetes", "GitHub Actions", "AWS", "Helm", "ArgoCD"]
     },
