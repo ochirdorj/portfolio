@@ -52,6 +52,12 @@ export const content = {
       github: "https://github.com/ochirdorj/root_modules"
     },
     {
+      title: "Reusable Terraform Module for AWS Service Control Policies",
+      description: "Two-repo Terraform setup — a reusable child module that deploys any SCP to any AWS Organization target, and a root module that consumes it. To enforce a new policy across the org you write a JSON file and pass it as a variable — no repeated boilerplate. The child module is pinned to a specific git commit so every environment gets the exact same code. Ships with tag enforcement, region restriction, and root account lockdown policies.",
+      tags: ["Terraform", "AWS Organizations", "SCP", "Reusable Module", "IaC"],
+      github: "https://github.com/ochirdorj/service_control_policy"
+    },
+    {
       title: "Portfolio Site on AWS",
       description: "Static Next.js export deployed to S3, served globally via CloudFront CDN with HTTPS, DNS on Route 53. GitHub Actions builds and syncs on every push to main using OIDC federation — no AWS access keys stored anywhere. The pipeline: git push → npm build → S3 sync → CloudFront cache invalidation → live in seconds.",
       tags: ["Next.js", "AWS S3", "CloudFront", "Route 53", "GitHub Actions", "OIDC"],
