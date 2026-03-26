@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Alex Dorj — DevOps / Cloud Engineer",
+  title: "Erdenetugs.E — DevOps / Cloud Engineer",
   description:
     "DevOps / Cloud Engineer based in Ulaanbaatar, Mongolia. Kubernetes, AWS EKS, GitOps, CI/CD.",
 };
