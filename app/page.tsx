@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { content } from "@/data/content";
+import { content, type Project } from "@/data/content";
 import {
   SiKubernetes, SiHelm, SiArgo, SiDocker, SiTerraform,
   SiGithubactions, SiNodedotjs, SiPython, SiLinux, SiGit,
@@ -490,7 +490,7 @@ export default function Home() {
             />
           </FadeIn>
           <div style={{ display: "grid", gap: 20 }}>
-            {(content.projects as Array<typeof content.projects[0] & { infra?: string }>).map((project, i) => (
+            {content.projects.map((project: Project, i: number) => (
               <FadeIn key={project.title} delay={i * 70}>
                 <div
                   className="card-lift"
@@ -504,6 +504,20 @@ export default function Home() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
                     <h3 style={{ fontSize: 17, fontWeight: 700, color: C.heading, margin: 0 }}>{project.title}</h3>
                     <div style={{ display: "flex", gap: 10 }}>
+                      {project.links && project.links.map(link => (
+                        <a
+                          key={link.label}
+                          href={link.url} target="_blank" rel="noopener noreferrer"
+                          className="project-link"
+                          style={{
+                            fontSize: 13, color: C.blue200, textDecoration: "none",
+                            border: "1px solid rgba(191,219,254,0.22)", padding: "5px 14px",
+                            borderRadius: 9999, transition: "all 0.2s",
+                          }}
+                        >
+                          {link.label} ↗
+                        </a>
+                      ))}
                       {project.github && (
                         <a
                           href={project.github} target="_blank" rel="noopener noreferrer"
