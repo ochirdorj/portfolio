@@ -113,15 +113,7 @@ const skillCategories = [
   { name: "Languages & Tools", subskills: ["Node.js", "Python", "Bash", "Git", "Linux", "FastAPI"] },
 ];
 
-const certifications = [
-  { name: "AWS Cloud Practitioner", issuer: "Amazon Web Services" },
-  { name: "AWS Solutions Architect", issuer: "Amazon Web Services" },
-  { name: "Kubernetes — KCNA", issuer: "Cloud Native Computing Foundation" },
-  { name: "HashiCorp Terraform Associate", issuer: "HashiCorp" },
-  { name: "GitHub Actions Certified", issuer: "GitHub" },
-  { name: "Python — PCEP", issuer: "Python Institute" },
-  { name: "Linux Essentials Certificate", issuer: "LPI" },
-];
+// certifications now come from content.certifications
 
 // ─── AstroWind-inspired dark color palette ────────────────────────────────────
 const C = {
@@ -277,6 +269,7 @@ export default function Home() {
         .card-hover:hover { border-color: ${C.borderHover} !important; box-shadow: 0 8px 40px rgba(1,97,239,0.1) !important; }
         .card-lift:hover { border-color: ${C.borderHover} !important; transform: translateY(-3px) !important; box-shadow: 0 12px 48px rgba(1,97,239,0.12) !important; }
         .project-link:hover { background: rgba(191,219,254,0.08) !important; border-color: rgba(191,219,254,0.5) !important; }
+        .verify-link:hover { background: rgba(1,97,239,0.25) !important; border-color: rgba(1,97,239,0.7) !important; }
         @media (max-width: 768px) {
           .about-grid { grid-template-columns: 1fr !important; }
           .nav-full { display: none !important; }
@@ -401,7 +394,7 @@ export default function Home() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {[
                   { label: "Projects",       value: `${content.projects.length}+` },
-                  { label: "Certifications", value: `${certifications.length}` },
+                  { label: "Certifications", value: `${content.certifications.length}` },
                   { label: "Cloud",          value: "AWS" },
                   { label: "Orchestration",  value: "K8s" },
                 ].map(stat => (
@@ -634,7 +627,7 @@ export default function Home() {
             />
           </FadeIn>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-            {certifications.map((cert, i) => (
+            {content.certifications.map((cert, i) => (
               <FadeIn key={cert.name} delay={i * 50}>
                 <div
                   className="card-hover"
@@ -653,16 +646,23 @@ export default function Home() {
                   }}>
                     <span style={{ color: C.primary, fontSize: 18, fontWeight: 700 }}>✓</span>
                   </div>
-                  <div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 14, fontWeight: 600, color: C.heading, marginBottom: 4, marginTop: 0 }}>{cert.name}</p>
-                    <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>{cert.issuer}</p>
-                    <span style={{
-                      fontSize: 11, color: C.blue200, marginTop: 8,
-                      background: C.tagBg, display: "inline-block",
-                      padding: "2px 10px", borderRadius: 9999, border: `1px solid ${C.tagBorder}`,
-                    }}>
-                      Verified
-                    </span>
+                    <p style={{ fontSize: 12, color: C.muted, margin: "0 0 10px" }}>{cert.issuer}</p>
+                    <a
+                      href={cert.verifyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="verify-link"
+                      style={{
+                        fontSize: 11, color: C.blue200,
+                        background: C.tagBg, display: "inline-flex", alignItems: "center", gap: 4,
+                        padding: "3px 10px", borderRadius: 9999, border: `1px solid ${C.tagBorder}`,
+                        textDecoration: "none", transition: "all 0.2s",
+                      }}
+                    >
+                      ↗ Verify
+                    </a>
                   </div>
                 </div>
               </FadeIn>

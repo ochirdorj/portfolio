@@ -80,13 +80,41 @@ export const content = {
   ],
 
   certifications: [
-    "AWS Cloud Practitioner",
-    "AWS Solutions Architect",
-    "Kubernetes — KCNA",
-    "HashiCorp Terraform Associate",
-    "GitHub Actions Certified",
-    "Python — PCEP",
-    "Linux Essentials Certificate",
+    {
+      name: "AWS Cloud Practitioner",
+      issuer: "Amazon Web Services",
+      verifyUrl: "https://cp.certmetrics.com/amazon/en/public/verify/credential/349b770d63294faf887d4038c2ebb19b"
+    },
+    {
+      name: "AWS Solutions Architect",
+      issuer: "Amazon Web Services",
+      verifyUrl: "https://cp.certmetrics.com/amazon/en/public/verify/credential/ea83c9656d784a12822168412060c061"
+    },
+    {
+      name: "Kubernetes — KCNA",
+      issuer: "Cloud Native Computing Foundation",
+      verifyUrl: "https://ti-user-certificates.s3.amazonaws.com/e0df7fbf-a057-42af-8a1f-590912be5460/0b0b577c-5bbc-4953-b37e-90e69d01de22-erdenetugs-enkhchuluun-caa0da87-3f96-4d79-a36d-1d9a101d76b1-certificate.pdf"
+    },
+    {
+      name: "HashiCorp Terraform Associate",
+      issuer: "HashiCorp",
+      verifyUrl: "https://www.credly.com/badges/1a4fca9b-18a0-4bad-9ae8-066b10dd17c6"
+    },
+    {
+      name: "GitHub Actions Certified",
+      issuer: "GitHub",
+      verifyUrl: "https://learn.microsoft.com/en-us/users/erdenetugsenkhchuluun-0002/credentials/430946f81a1050ab?ref=https%3A%2F%2Fwww.linkedin.com%2F"
+    },
+    {
+      name: "Python — PCEP",
+      issuer: "Python Institute",
+      verifyUrl: "https://verify.openedg.org/?id=tOgT.XR1s.zs0j"
+    },
+    {
+      name: "Linux Essentials Certificate",
+      issuer: "LPI",
+      verifyUrl: "https://cs.lpi.org/caf/Xamman/certification/verify/LPI000656039/n57wht7htd"
+    },
   ],
 
   contact: {
