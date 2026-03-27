@@ -283,7 +283,7 @@ export default function Home() {
         @media (max-width: 768px) {
           .about-grid { grid-template-columns: 1fr !important; }
           .nav-full { display: none !important; }
-          .hero-pad { padding: 120px 20px 80px !important; }
+          .hero-pad { padding: 100px 20px 48px !important; }
           .section-pad { padding: 60px 20px 72px !important; }
           .hero-layout { flex-direction: column !important; align-items: center !important; text-align: center !important; }
           .hero-photo { order: -1; margin-bottom: 28px; margin-left: 0 !important; }
@@ -339,12 +339,12 @@ export default function Home() {
         }} />
         <div
           className="hero-pad"
-          style={{ maxWidth: 1280, margin: "0 auto", padding: "168px 24px 128px", position: "relative" }}
+          style={{ maxWidth: 1280, margin: "0 auto", padding: "128px 24px 64px", position: "relative" }}
         >
           <FadeIn>
             <div
               className="hero-layout"
-              style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 48 }}
+              style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 64 }}
             >
               {/* Left: text + buttons */}
               <div
@@ -400,7 +400,7 @@ export default function Home() {
               {/* Right: profile photo */}
               <div
                 className="hero-photo"
-                style={{ flexShrink: 0, marginLeft: 16 }}
+                style={{ flexShrink: 0 }}
               >
                 <img
                   src="/profile.png"
