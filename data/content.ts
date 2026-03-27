@@ -81,7 +81,7 @@ export const content = {
 },
     {
       title: "Portfolio Site on AWS",
-      description: "Static Next.js export deployed to S3, served globally via CloudFront CDN with HTTPS, DNS on Route 53. GitHub Actions builds and syncs on every push to main using OIDC federation — no AWS access keys stored anywhere. The pipeline: git push → npm build → S3 sync → CloudFront cache invalidation → live in seconds.",
+      description: "This is a static Next.js exported website deployed automatically whenever I push code to the main branch. GitHub Actions builds the app and syncs it to S3, then invalidates the CloudFront cache so changes go live in seconds. For security, OIDC is used to authenticate to AWS instead of storing long-lived access keys in the repo. Route 53 manages DNS and CloudFront serves the site globally over HTTPS.",
       tags: ["Next.js", "AWS S3", "CloudFront", "Route 53", "GitHub Actions", "OIDC"],
       github: "https://github.com/ochirdorj/portfolio"
     },
