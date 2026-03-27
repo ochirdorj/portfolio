@@ -53,7 +53,7 @@ export const content = {
   projects: [
     {
       title: "Production GitOps Pipeline on AWS EKS",
-      description: "When developer pushes the code to main branch, GitHub Actions builds and pushes the image to ECR, ArgoCD deploys it to EKS with a rolling update so nothing goes down. Rollback is just git revert. Scales automatically under load.",
+      description: "Every push to main kicks off GitHub Actions — it builds a fresh Docker image, tags it with the git SHA, and pushes it to ECR. ArgoCD detects the new tag in the infra repo and rolls it out to EKS with a rolling update — old pods stay alive until the new ones pass their health checks, so there is zero downtime. Rolling back is just a git revert. When traffic spikes, HPA scales the pods up automatically and brings them back down when things quiet down.",
       tags: ["Kubernetes", "AWS EKS", "ArgoCD", "Helm", "GitHub Actions", "Docker", "OIDC", "HPA"],
       github: "https://github.com/ochirdorj/my-app",
       infra: "https://github.com/ochirdorj/my-app-infra"
