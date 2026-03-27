@@ -394,25 +394,16 @@ export default function Home() {
             className="hero-layout"
             style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 64 }}
           >
-            {/* Left: profile photo — slides in from left */}
-            <div
-              className="hero-photo"
-              style={{
-                flexShrink: 0,
-                animation: heroReady ? "hero-slide-left 0.6s ease-out 0.3s both" : "none",
-                opacity: heroReady ? undefined : 0,
-              }}
-            >
+            {/* Left: profile photo */}
+            <div className="hero-photo" style={{ flexShrink: 0 }}>
               <img
                 src="/profile.jpg"
                 alt="Profile photo"
-                className="profile-float"
                 style={{
                   width: 240, height: 240,
                   borderRadius: "50%", objectFit: "cover",
                   border: `3px solid ${C.primary}`,
                   display: "block",
-                  animationDelay: "0.9s",
                 }}
               />
             </div>

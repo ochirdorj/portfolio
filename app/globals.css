@@ -73,23 +73,6 @@ html {
   }
 }
 
-/* ── Profile photo float ───────────────────────────────────── */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-    box-shadow: 0 0 24px rgba(1, 97, 239, 0.3);
-  }
-  50% {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 32px rgba(1, 97, 239, 0.5);
-  }
-}
-
-.profile-float {
-  animation: float 3s ease-in-out infinite;
-}
-
 /* ── Skill cards ───────────────────────────────────────────── */
 .skill-card {
   transition: border-color 0.2s ease, box-shadow 0.2s ease,
