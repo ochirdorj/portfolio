@@ -60,7 +60,7 @@ export const content = {
     },
 {
   title: "Event-Driven Self-Hosted GitHub Actions Runners on AWS",
-  description: "I got tired of paying for CI servers that sit idle between jobs, so I built a system where runners only exist when there is actual work to do. When a GitHub Actions job is triggered, a webhook hits API Gateway, a Lambda validates the signature, and SQS buffers the event. A second Lambda then picks it up, tries Spot pricing first, and launches a fresh EC2 instance that registers as a runner, does the job, and terminates itself. No always-on servers, no wasted compute. Cold start is under 60 seconds because runners boot from a pre-baked AMI. A dedicated Terraform module builds that image — it spins up a temporary EC2 instance, installs everything via SSM without any SSH or open ports, snapshots it into an AMI, stores the ID in SSM Parameter Store, and terminates the builder. One reusable GitHub Actions workflow drives all five Terraform modules via OIDC. No static AWS keys stored anywhere.",
+  description: "No always-on CI servers. Runners spin up when a job is queued and terminate the moment it finishes. A GitHub webhook triggers API Gateway → Lambda validates it → SQS buffers it → another Lambda launches a Spot EC2 instance. The runner does the job and kills itself. Cold start is under 60 seconds thanks to a pre-baked AMI that has everything installed. No SSH, no open ports — SSM handles it all.",
   tags: ["Terraform", "AWS Lambda", "SQS", "API Gateway", "EC2 Spot", "GitHub Actions", "OIDC", "AWS Secrets Manager", "Packer", "Docker", "Node.js"],
   links: [
     { label: "Root Modules", url: "https://github.com/ochirdorj/root_modules" },
