@@ -352,7 +352,7 @@ export default function Home() {
                 style={{ flexShrink: 0 }}
               >
                 <img
-                  src="/Profile.png"
+                  src="/profile.jpg"
                   alt="Profile photo"
                   style={{
                     width: 240,
