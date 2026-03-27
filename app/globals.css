@@ -16,3 +16,113 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* ── Custom cursor ─────────────────────────────────────────── */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
+
+#custom-cursor {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background: rgba(1, 97, 239, 0.85);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 99999;
+  transition: width 0.15s ease, height 0.15s ease, background 0.15s ease,
+    border 0.15s ease;
+  will-change: left, top;
+}
+
+#custom-cursor.cursor-large {
+  width: 28px;
+  height: 28px;
+  background: rgba(1, 97, 239, 0.25);
+  border: 1.5px solid rgba(1, 97, 239, 0.7);
+}
+
+@media (hover: none) {
+  #custom-cursor {
+    display: none;
+  }
+}
+
+/* ── Hero entry animations ─────────────────────────────────── */
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Profile photo float ───────────────────────────────────── */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 0 24px rgba(1, 97, 239, 0.3);
+  }
+  50% {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 32px rgba(1, 97, 239, 0.5);
+  }
+}
+
+.profile-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ── Skill cards ───────────────────────────────────────────── */
+.skill-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+.skill-card:hover {
+  transform: scale(1.02) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 0 0 1px rgba(1, 97, 239, 0.25),
+    0 8px 40px rgba(1, 97, 239, 0.15) !important;
+}
+
+/* ── Cert cards ────────────────────────────────────────────── */
+.cert-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+.cert-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 8px 32px rgba(1, 97, 239, 0.18) !important;
+}
+
+/* ── Button active state ───────────────────────────────────── */
+.btn-primary:active,
+.btn-ghost:active {
+  transform: scale(0.98) !important;
+}
+
+/* ── Project card: tech tags brighten on card hover ─────────── */
+.card-lift:hover .tech-tag {
+  border-color: rgba(1, 97, 239, 0.55) !important;
+  background: rgba(1, 97, 239, 0.18) !important;
+}

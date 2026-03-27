@@ -87,8 +87,8 @@ function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
       ref={ref}
       style={{
         opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(24px)",
-        transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
+        transform: inView ? "translateY(0)" : "translateY(30px)",
+        transition: `opacity 0.5s ease-out ${delay}ms, transform 0.5s ease-out ${delay}ms`,
       }}
     >
       {children}
@@ -170,6 +170,8 @@ function SectionHeader({
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function Home() {
   const [loaded, setLoaded]           = useState(false);
+  const [exiting, setExiting]         = useState(false);
+  const [heroReady, setHeroReady]     = useState(false);
   const [progress, setProgress]       = useState(0);
   const [lineIndex, setLineIndex]     = useState(0);
   const [displayedLine, setDisplayedLine] = useState("");
@@ -182,7 +184,8 @@ export default function Home() {
 
     const typeNextLine = () => {
       if (currentLine >= LOADING_LINES.length) {
-        setTimeout(() => setLoaded(true), 400);
+        setTimeout(() => setExiting(true), 200);
+        setTimeout(() => setLoaded(true), 800);
         return;
       }
       const line = LOADING_LINES[currentLine];
@@ -217,6 +220,48 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loaded]);
 
+  // Hero entry animation trigger
+  useEffect(() => {
+    if (!loaded) return;
+    const t = setTimeout(() => setHeroReady(true), 50);
+    return () => clearTimeout(t);
+  }, [loaded]);
+
+  // Custom cursor (desktop only)
+  useEffect(() => {
+    if (!loaded) return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(hover: none)").matches) return;
+
+    const cursor = document.createElement("div");
+    cursor.id = "custom-cursor";
+    document.body.appendChild(cursor);
+    document.documentElement.classList.add("custom-cursor-active");
+
+    const onMove = (e: MouseEvent) => {
+      cursor.style.left = e.clientX + "px";
+      cursor.style.top  = e.clientY + "px";
+    };
+    const onOver = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest("a, button")) cursor.classList.add("cursor-large");
+    };
+    const onOut = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest("a, button")) cursor.classList.remove("cursor-large");
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseover",  onOver);
+    document.addEventListener("mouseout",   onOut);
+
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseover",  onOver);
+      document.removeEventListener("mouseout",   onOut);
+      document.documentElement.classList.remove("custom-cursor-active");
+      document.getElementById("custom-cursor")?.remove();
+    };
+  }, [loaded]);
+
   const navItems = [
     { id: "home",           label: "Home" },
     { id: "about",          label: "About" },
@@ -234,6 +279,7 @@ export default function Home() {
         background: C.bg, minHeight: "100vh",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: "ui-monospace, 'Cascadia Code', 'Fira Code', monospace",
+        opacity: exiting ? 0 : 1, transition: "opacity 0.5s ease",
       }}>
         <div style={{ width: "min(460px, 88vw)" }}>
           <p style={{ color: C.blue200, fontSize: 11, letterSpacing: 3, textTransform: "uppercase", marginBottom: 28, marginTop: 0 }}>
@@ -274,10 +320,13 @@ export default function Home() {
     }}>
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .nav-link { transition: color 0.15s ease, background 0.15s ease !important; }
         .nav-link:hover { color: ${C.text} !important; }
+        .btn-primary { transition: background 0.2s ease, transform 0.2s ease !important; }
         .btn-ghost:hover { background: rgba(255,255,255,0.06) !important; border-color: rgba(229,236,246,0.45) !important; }
         .card-hover:hover { border-color: ${C.borderHover} !important; box-shadow: 0 8px 40px rgba(1,97,239,0.1) !important; }
-        .card-lift:hover { border-color: ${C.borderHover} !important; transform: translateY(-3px) !important; box-shadow: 0 12px 48px rgba(1,97,239,0.12) !important; }
+        .card-lift { transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important; }
+        .card-lift:hover { border-color: ${C.borderHover} !important; transform: translateY(-4px) !important; box-shadow: 0 12px 48px rgba(1,97,239,0.14) !important; }
         .project-link:hover { background: rgba(191,219,254,0.08) !important; border-color: rgba(191,219,254,0.5) !important; }
         .verify-link:hover { background: rgba(1,97,239,0.25) !important; border-color: rgba(1,97,239,0.7) !important; }
         @media (max-width: 768px) {
@@ -341,83 +390,98 @@ export default function Home() {
           className="hero-pad"
           style={{ maxWidth: 1280, margin: "0 auto", padding: "128px 24px 64px", position: "relative" }}
         >
-          <FadeIn>
+          <div
+            className="hero-layout"
+            style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 64 }}
+          >
+            {/* Left: profile photo — slides in from left */}
             <div
-              className="hero-layout"
-              style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 64 }}
+              className="hero-photo"
+              style={{
+                flexShrink: 0,
+                animation: heroReady ? "hero-slide-left 0.6s ease-out 0.3s both" : "none",
+                opacity: heroReady ? undefined : 0,
+              }}
             >
-              {/* Left: profile photo */}
-              <div
-                className="hero-photo"
-                style={{ flexShrink: 0 }}
-              >
-                <img
-                  src="/profile.jpg"
-                  alt="Profile photo"
-                  style={{
-                    width: 240,
-                    height: 240,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: `3px solid ${C.primary}`,
-                    boxShadow: `0 0 24px rgba(1,97,239,0.3)`,
-                    display: "block",
-                  }}
-                />
-              </div>
+              <img
+                src="/profile.jpg"
+                alt="Profile photo"
+                className="profile-float"
+                style={{
+                  width: 240, height: 240,
+                  borderRadius: "50%", objectFit: "cover",
+                  border: `3px solid ${C.primary}`,
+                  display: "block",
+                  animationDelay: "0.9s",
+                }}
+              />
+            </div>
 
-              {/* Right: text + buttons */}
+            {/* Right: text + buttons — staggered fade-up */}
+            <div
+              className="hero-text"
+              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start" }}
+            >
+              <p style={{
+                color: C.blue200, fontWeight: 700, letterSpacing: "0.1em",
+                textTransform: "uppercase", fontSize: 13, marginBottom: 20, marginTop: 0,
+                animation: heroReady ? "hero-fade-up 0.6s ease-out 0.2s both" : "none",
+                opacity: heroReady ? undefined : 0,
+              }}>
+                {content.title}
+              </p>
+              <h1 style={{
+                fontSize: "clamp(44px, 8vw, 88px)", fontWeight: 800, color: C.heading,
+                margin: "0 0 24px", lineHeight: 1.05, letterSpacing: -2,
+                animation: heroReady ? "hero-fade-up 0.6s ease-out 0s both" : "none",
+                opacity: heroReady ? undefined : 0,
+              }}>
+                {content.name}
+              </h1>
+              <p style={{
+                fontSize: "clamp(16px, 2vw, 19px)", color: C.muted,
+                maxWidth: 580, margin: "0 0 44px", lineHeight: 1.8,
+                animation: heroReady ? "hero-fade-up 0.6s ease-out 0.4s both" : "none",
+                opacity: heroReady ? undefined : 0,
+              }}>
+                {content.about}
+              </p>
               <div
-                className="hero-text"
-                style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start" }}
+                className="hero-buttons"
+                style={{
+                  display: "flex", gap: 16, flexWrap: "wrap",
+                  animation: heroReady ? "hero-fade-up 0.6s ease-out 0.6s both" : "none",
+                  opacity: heroReady ? undefined : 0,
+                }}
               >
-                <p style={{
-                  color: C.blue200, fontWeight: 700, letterSpacing: "0.1em",
-                  textTransform: "uppercase", fontSize: 13, marginBottom: 20, marginTop: 0,
-                }}>
-                  {content.title}
-                </p>
-                <h1 style={{
-                  fontSize: "clamp(44px, 8vw, 88px)", fontWeight: 800, color: C.heading,
-                  margin: "0 0 24px", lineHeight: 1.05, letterSpacing: -2,
-                }}>
-                  {content.name}
-                </h1>
-                <p style={{
-                  fontSize: "clamp(16px, 2vw, 19px)", color: C.muted,
-                  maxWidth: 580, margin: "0 0 44px", lineHeight: 1.8,
-                }}>
-                  {content.about}
-                </p>
-                <div className="hero-buttons" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                  <a
-                    href="#experience"
-                    style={{
-                      padding: "13px 32px", background: C.primary, color: "#fff",
-                      fontWeight: 600, fontSize: 15, textDecoration: "none",
-                      borderRadius: 9999, border: `1px solid ${C.primary}`, transition: "background 0.2s",
-                    }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.primaryHov}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = C.primary}
-                  >
-                    View Experience
-                  </a>
-                  <a
-                    href={content.contact.github}
-                    target="_blank" rel="noopener noreferrer"
-                    className="btn-ghost"
-                    style={{
-                      padding: "13px 32px", background: "transparent", color: C.text,
-                      fontWeight: 600, fontSize: 15, textDecoration: "none",
-                      borderRadius: 9999, border: "1px solid rgba(229,236,246,0.22)", transition: "all 0.2s",
-                    }}
-                  >
-                    GitHub Profile ↗
-                  </a>
-                </div>
+                <a
+                  href="#experience"
+                  className="btn-primary"
+                  style={{
+                    padding: "13px 32px", background: C.primary, color: "#fff",
+                    fontWeight: 600, fontSize: 15, textDecoration: "none",
+                    borderRadius: 9999, border: `1px solid ${C.primary}`,
+                  }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.primaryHov}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = C.primary}
+                >
+                  View Experience
+                </a>
+                <a
+                  href={content.contact.github}
+                  target="_blank" rel="noopener noreferrer"
+                  className="btn-ghost"
+                  style={{
+                    padding: "13px 32px", background: "transparent", color: C.text,
+                    fontWeight: 600, fontSize: 15, textDecoration: "none",
+                    borderRadius: 9999, border: "1px solid rgba(229,236,246,0.22)", transition: "all 0.2s",
+                  }}
+                >
+                  GitHub Profile ↗
+                </a>
               </div>
             </div>
-          </FadeIn>
+          </div>
         </div>
       </section>
 
@@ -477,12 +541,11 @@ export default function Home() {
             {skillCategories.map((cat, i) => (
               <FadeIn key={cat.name} delay={i * 60}>
                 <div
-                  className="card-hover"
+                  className="skill-card"
                   style={{
                     background: C.card, border: `1px solid ${C.border}`,
                     borderRadius: 8, padding: 24, height: "100%",
                     backdropFilter: "blur(8px)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
-                    transition: "border-color 0.2s, box-shadow 0.2s",
                   }}
                 >
                   <h3 style={{ fontSize: 14, fontWeight: 700, color: C.heading, marginBottom: 16, marginTop: 0, letterSpacing: "0.01em" }}>
@@ -494,11 +557,13 @@ export default function Home() {
                       return (
                         <span
                           key={s}
+                          className="tech-tag"
                           style={{
                             fontSize: 12, padding: "4px 12px",
                             background: C.tagBg, color: C.blue200,
                             border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
                             display: "inline-flex", alignItems: "center", gap: 5,
+                            transition: "border-color 0.2s, background 0.2s",
                           }}
                         >
                           {Icon && <Icon size={12} />}
@@ -588,11 +653,13 @@ export default function Home() {
                       return (
                         <span
                           key={tag}
+                          className="tech-tag"
                           style={{
                             fontSize: 12, padding: "3px 12px",
                             background: C.tagBg, color: C.blue200,
                             border: `1px solid ${C.tagBorder}`, borderRadius: 9999,
                             display: "inline-flex", alignItems: "center", gap: 5,
+                            transition: "border-color 0.2s, background 0.2s",
                           }}
                         >
                           {Icon && <Icon size={11} />}
@@ -689,13 +756,12 @@ export default function Home() {
             {content.certifications.map((cert, i) => (
               <FadeIn key={cert.name} delay={i * 50}>
                 <div
-                  className="card-hover"
+                  className="cert-card"
                   style={{
                     background: C.card, border: `1px solid ${C.border}`,
                     borderRadius: 8, padding: 20,
                     display: "flex", alignItems: "flex-start", gap: 16,
                     backdropFilter: "blur(8px)", boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
-                    transition: "border-color 0.2s, box-shadow 0.2s",
                   }}
                 >
                   <div style={{
@@ -742,10 +808,11 @@ export default function Home() {
             <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
               <a
                 href={`mailto:${content.contact.email}`}
+                className="btn-primary"
                 style={{
                   padding: "13px 32px", background: C.primary, color: "#fff",
                   fontWeight: 600, fontSize: 15, textDecoration: "none",
-                  borderRadius: 9999, border: `1px solid ${C.primary}`, transition: "background 0.2s",
+                  borderRadius: 9999, border: `1px solid ${C.primary}`,
                 }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.primaryHov}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = C.primary}
