@@ -285,6 +285,10 @@ export default function Home() {
           .nav-full { display: none !important; }
           .hero-pad { padding: 120px 20px 80px !important; }
           .section-pad { padding: 60px 20px 72px !important; }
+          .hero-layout { flex-direction: column !important; align-items: center !important; text-align: center !important; }
+          .hero-photo { order: -1; margin-bottom: 28px; margin-left: 0 !important; }
+          .hero-text { align-items: center !important; }
+          .hero-buttons { justify-content: center !important; }
         }
         @media (max-width: 900px) {
           .nav-label { display: none; }
@@ -335,52 +339,83 @@ export default function Home() {
         }} />
         <div
           className="hero-pad"
-          style={{ maxWidth: 1280, margin: "0 auto", padding: "168px 24px 128px", textAlign: "center", position: "relative" }}
+          style={{ maxWidth: 1280, margin: "0 auto", padding: "168px 24px 128px", position: "relative" }}
         >
           <FadeIn>
-            <p style={{
-              color: C.blue200, fontWeight: 700, letterSpacing: "0.1em",
-              textTransform: "uppercase", fontSize: 13, marginBottom: 20, marginTop: 0,
-            }}>
-              {content.title}
-            </p>
-            <h1 style={{
-              fontSize: "clamp(44px, 8vw, 88px)", fontWeight: 800, color: C.heading,
-              margin: "0 0 24px", lineHeight: 1.05, letterSpacing: -2,
-            }}>
-              {content.name}
-            </h1>
-            <p style={{
-              fontSize: "clamp(16px, 2vw, 19px)", color: C.muted,
-              maxWidth: 580, margin: "0 auto 44px", lineHeight: 1.8,
-            }}>
-              {content.about}
-            </p>
-            <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-              <a
-                href="#experience"
-                style={{
-                  padding: "13px 32px", background: C.primary, color: "#fff",
-                  fontWeight: 600, fontSize: 15, textDecoration: "none",
-                  borderRadius: 9999, border: `1px solid ${C.primary}`, transition: "background 0.2s",
-                }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.primaryHov}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = C.primary}
+            <div
+              className="hero-layout"
+              style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 48 }}
+            >
+              {/* Left: text + buttons */}
+              <div
+                className="hero-text"
+                style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start" }}
               >
-                View Experience
-              </a>
-              <a
-                href={content.contact.github}
-                target="_blank" rel="noopener noreferrer"
-                className="btn-ghost"
-                style={{
-                  padding: "13px 32px", background: "transparent", color: C.text,
-                  fontWeight: 600, fontSize: 15, textDecoration: "none",
-                  borderRadius: 9999, border: "1px solid rgba(229,236,246,0.22)", transition: "all 0.2s",
-                }}
+                <p style={{
+                  color: C.blue200, fontWeight: 700, letterSpacing: "0.1em",
+                  textTransform: "uppercase", fontSize: 13, marginBottom: 20, marginTop: 0,
+                }}>
+                  {content.title}
+                </p>
+                <h1 style={{
+                  fontSize: "clamp(44px, 8vw, 88px)", fontWeight: 800, color: C.heading,
+                  margin: "0 0 24px", lineHeight: 1.05, letterSpacing: -2,
+                }}>
+                  {content.name}
+                </h1>
+                <p style={{
+                  fontSize: "clamp(16px, 2vw, 19px)", color: C.muted,
+                  maxWidth: 580, margin: "0 0 44px", lineHeight: 1.8,
+                }}>
+                  {content.about}
+                </p>
+                <div className="hero-buttons" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                  <a
+                    href="#experience"
+                    style={{
+                      padding: "13px 32px", background: C.primary, color: "#fff",
+                      fontWeight: 600, fontSize: 15, textDecoration: "none",
+                      borderRadius: 9999, border: `1px solid ${C.primary}`, transition: "background 0.2s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.primaryHov}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = C.primary}
+                  >
+                    View Experience
+                  </a>
+                  <a
+                    href={content.contact.github}
+                    target="_blank" rel="noopener noreferrer"
+                    className="btn-ghost"
+                    style={{
+                      padding: "13px 32px", background: "transparent", color: C.text,
+                      fontWeight: 600, fontSize: 15, textDecoration: "none",
+                      borderRadius: 9999, border: "1px solid rgba(229,236,246,0.22)", transition: "all 0.2s",
+                    }}
+                  >
+                    GitHub Profile ↗
+                  </a>
+                </div>
+              </div>
+
+              {/* Right: profile photo */}
+              <div
+                className="hero-photo"
+                style={{ flexShrink: 0, marginLeft: 16 }}
               >
-                GitHub Profile ↗
-              </a>
+                <img
+                  src="/profile.png"
+                  alt="Profile photo"
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: `3px solid ${C.primary}`,
+                    boxShadow: `0 0 24px rgba(1,97,239,0.3)`,
+                    display: "block",
+                  }}
+                />
+              </div>
             </div>
           </FadeIn>
         </div>
