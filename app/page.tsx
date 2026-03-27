@@ -486,7 +486,6 @@ export default function Home() {
               style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start", maxWidth: 960, margin: "0 auto" }}
             >
               <div>
-                <p style={{ fontSize: 16, color: C.text, lineHeight: 1.9, marginBottom: 20, marginTop: 0 }}>{content.about}</p>
                 <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.9, margin: 0 }}>
                   Based in {content.location}. Focused on automation, cloud infrastructure, and making deployments fast and reliable.
                 </p>
