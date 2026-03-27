@@ -286,7 +286,7 @@ export default function Home() {
           .hero-pad { padding: 100px 20px 48px !important; }
           .section-pad { padding: 60px 20px 72px !important; }
           .hero-layout { flex-direction: column !important; align-items: center !important; text-align: center !important; }
-          .hero-photo { order: -1; margin-bottom: 28px; margin-left: 0 !important; }
+          .hero-photo { margin-bottom: 28px; }
           .hero-text { align-items: center !important; }
           .hero-buttons { justify-content: center !important; }
         }
@@ -346,7 +346,27 @@ export default function Home() {
               className="hero-layout"
               style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 64 }}
             >
-              {/* Left: text + buttons */}
+              {/* Left: profile photo */}
+              <div
+                className="hero-photo"
+                style={{ flexShrink: 0 }}
+              >
+                <img
+                  src="/profile.png"
+                  alt="Profile photo"
+                  style={{
+                    width: 240,
+                    height: 240,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: `3px solid ${C.primary}`,
+                    boxShadow: `0 0 24px rgba(1,97,239,0.3)`,
+                    display: "block",
+                  }}
+                />
+              </div>
+
+              {/* Right: text + buttons */}
               <div
                 className="hero-text"
                 style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start" }}
@@ -395,26 +415,6 @@ export default function Home() {
                     GitHub Profile ↗
                   </a>
                 </div>
-              </div>
-
-              {/* Right: profile photo */}
-              <div
-                className="hero-photo"
-                style={{ flexShrink: 0 }}
-              >
-                <img
-                  src="/profile.png"
-                  alt="Profile photo"
-                  style={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: `3px solid ${C.primary}`,
-                    boxShadow: `0 0 24px rgba(1,97,239,0.3)`,
-                    display: "block",
-                  }}
-                />
               </div>
             </div>
           </FadeIn>
