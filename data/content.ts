@@ -70,7 +70,7 @@ export const content = {
 },
 {
   title: "Reusable Terraform Module Library — AWS Infrastructure",
-  description: "A collection of three production-ready Terraform modules, each in its own repo and pinned to a specific git commit for safe consumption across teams. VPC module provisions a full network stack — public and private subnets across two AZs, NAT gateway, internet gateway, and route tables, with Kubernetes ELB tags baked in. S3 module covers everything a production bucket needs — encryption, versioning, object lock for WORM compliance, lifecycle rules, access logging, cross-region replication, and static website hosting — all toggled via variables. SCP module deploys any Service Control Policy to any AWS Organization target — OUs, accounts, or root — just by pointing it at a policy JSON file. All three follow the same pattern: child module handles the logic, root module handles the config, nothing is hardcoded.",
+  description: "Three Terraform modules, each in its own repo and pinned to a specific commit. The VPC module sets up a full network stack across two AZs with Kubernetes-ready subnet tags. The S3 module handles everything a production bucket needs — encryption, object lock, lifecycle rules — all toggled via variables, nothing hardcoded. The SCP module attaches any policy JSON to any AWS Organization target — OUs, accounts, or root — just by changing a variable.",
   tags: ["Terraform", "AWS VPC", "AWS S3", "AWS Organizations", "SCP", "Reusable Modules", "IaC"],
   links: [
     { label: "Root Modules", url: "https://github.com/ochirdorj/root_modules" },
